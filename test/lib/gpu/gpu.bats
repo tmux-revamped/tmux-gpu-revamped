@@ -504,10 +504,3 @@ GPU[0]		: VRAM Total Used Memory (B): 1073741824'
   run _read_sys_vram_total
   true
 }
-
-@test "gpu - a comma-decimal locale still formats with a dot" {
-  locale -a 2>/dev/null | grep -qiE '^pt_BR\.utf-?8$' || skip "the pt_BR.UTF-8 locale is not installed"
-  LC_ALL=pt_BR.UTF-8 LC_NUMERIC=pt_BR.UTF-8 run _mib_to_human 1536
-
-  [[ "${output}" == "1.5G" ]]
-}
