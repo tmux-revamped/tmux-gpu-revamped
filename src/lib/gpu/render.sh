@@ -27,7 +27,7 @@ _gpu_level() {
 
 _gpu_c_to_f() {
   [[ "${1}" =~ ^-?[0-9]+$ ]] || { echo ""; return 0; }
-  awk -v c="${1}" 'BEGIN { printf "%.0f", (c * 9 / 5) + 32 }'
+  LC_ALL=C awk -v c="${1}" 'BEGIN { printf "%.0f", (c * 9 / 5) + 32 }'
 }
 
 # metric_value RAW FMT_OPTION DEFAULT_FMT
@@ -93,7 +93,7 @@ gpu_temp_value() {
 # _mib_to_human MIB -> a GiB string like "8.0G" or "24G", empty for junk.
 _mib_to_human() {
   [[ "${1}" =~ ^[0-9]+$ ]] || { echo ""; return 0; }
-  awk -v m="${1}" 'BEGIN { g = m / 1024; if (g >= 10) printf "%.0fG", g; else printf "%.1fG", g }'
+  LC_ALL=C awk -v m="${1}" 'BEGIN { g = m / 1024; if (g >= 10) printf "%.0fG", g; else printf "%.1fG", g }'
 }
 
 # gram_abs_value USED_MIB TOTAL_MIB -> "18G / 24G", empty when either is unset.

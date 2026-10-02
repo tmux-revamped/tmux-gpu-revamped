@@ -122,7 +122,7 @@ gram_from_smi() {
   read -ra f <<< "${1//,/ }"
   local used="${f[0]:-}" total="${f[1]:-}"
   [[ "${used}" =~ ^[0-9]+$ && "${total}" =~ ^[0-9]+$ && "${total}" -gt 0 ]] || { echo ""; return 0; }
-  awk -v u="${used}" -v t="${total}" 'BEGIN { printf "%.0f", (u / t) * 100 }'
+  LC_ALL=C awk -v u="${used}" -v t="${total}" 'BEGIN { printf "%.0f", (u / t) * 100 }'
 }
 
 # _bytes_to_mib BYTES -> integer mebibytes, empty for non-numeric input.
@@ -151,7 +151,7 @@ gram_pct_from_pair() {
   read -ra f <<< "${1}"
   local used="${f[0]:-}" total="${f[1]:-}"
   [[ "${used}" =~ ^[0-9]+$ && "${total}" =~ ^[0-9]+$ && "${total}" -gt 0 ]] || { echo ""; return 0; }
-  awk -v u="${used}" -v t="${total}" 'BEGIN { printf "%.0f", (u / t) * 100 }'
+  LC_ALL=C awk -v u="${used}" -v t="${total}" 'BEGIN { printf "%.0f", (u / t) * 100 }'
 }
 
 # vram_from_nvidia LINE -> "USED TOTAL" MiB from "used, total" CSV.
@@ -197,7 +197,7 @@ power_from_nvidia() {
   read -ra f <<< "${1//,/ }"
   local draw="${f[0]:-}"
   [[ "${draw}" =~ ^[0-9]+\.?[0-9]*$ ]] || { echo ""; return 0; }
-  awk -v d="${draw}" 'BEGIN { printf "%.0f", d }'
+  LC_ALL=C awk -v d="${draw}" 'BEGIN { printf "%.0f", d }'
 }
 
 # power_pct_from_nvidia LINE -> draw as integer percent of limit.
@@ -206,7 +206,7 @@ power_pct_from_nvidia() {
   read -ra f <<< "${1//,/ }"
   local draw="${f[0]:-}" limit="${f[1]:-}"
   [[ "${draw}" =~ ^[0-9]+\.?[0-9]*$ && "${limit}" =~ ^[0-9]+\.?[0-9]*$ ]] || { echo ""; return 0; }
-  awk -v d="${draw}" -v l="${limit}" 'BEGIN { if (l <= 0) exit 0; printf "%.0f", (d / l) * 100 }'
+  LC_ALL=C awk -v d="${draw}" -v l="${limit}" 'BEGIN { if (l <= 0) exit 0; printf "%.0f", (d / l) * 100 }'
 }
 
 # power_from_rocm TEXT -> integer watts from the rocm power line.
@@ -214,7 +214,7 @@ power_from_rocm() {
   local w
   w=$(printf '%s\n' "${1}" | awk '/Average Graphics Package Power/ {gsub(/[^0-9.]/, "", $NF); print $NF; exit}')
   [[ "${w}" =~ ^[0-9]+\.?[0-9]*$ ]] || { echo ""; return 0; }
-  awk -v w="${w}" 'BEGIN { printf "%.0f", w }'
+  LC_ALL=C awk -v w="${w}" 'BEGIN { printf "%.0f", w }'
 }
 
 # fan_from_nvidia VALUE -> integer fan percent.

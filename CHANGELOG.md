@@ -13,6 +13,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   value only when the value is not empty, and `@gpu_revamped_icons` set to
   `nerd` labels every metric from a Nerd Font set. The default adds no labels.
 
+### Fixed
+
+- A comma-decimal locale such as pt_BR printed memory as `1,5G`. The
+  formatters now run under the C locale.
+
 ## [1.2.0] - 2026-06-29
 
 ### Added
