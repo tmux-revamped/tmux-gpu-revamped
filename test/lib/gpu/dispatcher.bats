@@ -225,3 +225,59 @@ teardown() {
   run main doctor
   [[ "${output}" == *"tmux-gpu-revamped doctor"* ]]
 }
+
+@test "gpu.sh dispatcher - a metric renders without a label by default" {
+  run gpu_labelled gpu_percentage "42%"
+
+  [[ "${output}" == "42%" ]]
+}
+
+@test "gpu.sh dispatcher - the nerd icon set labels a metric" {
+  set_tmux_option "@gpu_revamped_icons" "nerd"
+
+  run gpu_labelled gpu_percentage "42%"
+
+  [[ "${output}" == $'\xf3\xb0\xa2\xae'" 42%" ]]
+}
+
+@test "gpu.sh dispatcher - a label option drops the gpu prefix" {
+  set_tmux_option "@gpu_revamped_icons" "nerd"
+  set_tmux_option "@gpu_revamped_percentage_label" "G"
+
+  run gpu_labelled gpu_percentage "42%"
+
+  [[ "${output}" == "G 42%" ]]
+}
+
+@test "gpu.sh dispatcher - an empty label removes the icon set's label" {
+  set_tmux_option "@gpu_revamped_icons" "nerd"
+  gpu_option_exists() { [[ "${1}" == "@gpu_revamped_percentage_label" ]]; }
+
+  run gpu_labelled gpu_percentage "42%"
+
+  [[ "${output}" == "42%" ]]
+}
+
+@test "gpu.sh dispatcher - an empty value renders nothing even with a label" {
+  set_tmux_option "@gpu_revamped_icons" "nerd"
+
+  run gpu_labelled gpu_percentage ""
+
+  [ -z "${output}" ]
+}
+
+@test "gpu.sh dispatcher - only value metrics carry a label" {
+  run gpu_is_labelled gpu_fg_color
+
+  [ "${status}" -eq 1 ]
+}
+
+@test "gpu.sh dispatcher - main labels a rendered metric" {
+  set_tmux_option "@gpu_revamped_icons" "nerd"
+  gpu_tick() { :; }
+  gpu_render_metric() { echo "42%"; }
+
+  run main gpu_percentage
+
+  [[ "${output}" == $'\xf3\xb0\xa2\xae'" 42%" ]]
+}

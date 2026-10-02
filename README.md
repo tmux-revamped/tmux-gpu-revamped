@@ -101,6 +101,10 @@ Press `prefix + I` to install.
 | `@gpu_revamped_popup_width` / `@gpu_revamped_popup_height` | `80%` | popup size |
 | `@gpu_revamped_enable_logging` | `0` | set to `1` to log under `~/.tmux/gpu-revamped-logs` |
 
+## Labels
+
+Every value placeholder can carry a label, an icon or word printed before the value only when the value is not empty. Set `@gpu_revamped_<metric>_label`, where the metric is the placeholder name without its `gpu_` prefix, such as `@gpu_revamped_percentage_label`, or set `@gpu_revamped_icons` to `nerd` to label every metric from a Nerd Font set. A metric's own label wins over the set, and `''` removes the set's label for that metric. The default, `ascii`, adds no labels.
+
 ## Theme color suggestions
 
 The defaults leave the tier colors empty, so each metric inherits its tier color from the 16 ANSI names your active theme already remaps, which matches any theme out of the box. For exact hex instead of remapped ANSI, copy one block below. Each tier maps low to green, medium to yellow, and high to red, across the load, temperature, and GPU memory families.

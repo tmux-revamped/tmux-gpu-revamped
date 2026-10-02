@@ -79,17 +79,8 @@ gpu_tick() {
   cache_refresh_if_stale util "$(gpu_max_age)" gpu_refresh
 }
 
-main() {
-  local cmd="${1:-}"
-
-  case "${cmd}" in
-    refresh) gpu_refresh; return 0 ;;
-    popup)   gpu_popup; return 0 ;;
-    doctor)  gpu_doctor; return 0 ;;
-  esac
-
-  gpu_tick
-
+gpu_render_metric() {
+  local cmd="${1}"
   case "${cmd}" in
     gpu_percentage)    metric_value "$(cache_get util)" "@gpu_revamped_percentage_format" "%s%%" ;;
     gpu_icon)          metric_icon "$(cache_get util)" "gpu_revamped" 30 80 "▰▱▱" "▰▰▱" "▰▰▰" ;;
@@ -116,6 +107,77 @@ main() {
     gram_used)         gram_abs_value "$(cache_get gram_used)" "$(cache_get gram_total)" ;;
     *)                 return 0 ;;
   esac
+}
+
+gpu_is_labelled() {
+  case "${1}" in
+    gpu_percentage | gpu_temp | gpu_freq | gpu_graph | gpu_power | gpu_power_pct | gpu_fan | gpu_enc | gpu_dec | gpu_throttle | gpu_pstate | gpu_top_process | gram_percentage | gram_used) return 0 ;;
+    *) return 1 ;;
+  esac
+}
+
+gpu_nerd_label() {
+  case "${1}" in
+    gpu_percentage) printf '\xf3\xb0\xa2\xae' ;;
+    gpu_temp) printf '\xf3\xb0\x94\x8f' ;;
+    gpu_freq) printf '\xf3\xb0\x93\x85' ;;
+    gpu_graph) printf '\xf3\xb0\x9e\xb1' ;;
+    gpu_power) printf '\xf3\xb0\x89\x81' ;;
+    gpu_power_pct) printf '\xf3\xb0\x89\x81' ;;
+    gpu_fan) printf '\xf3\xb0\x88\x90' ;;
+    gpu_enc) printf '\xf3\xb0\x95\xa7' ;;
+    gpu_dec) printf '\xf3\xb0\x95\xa7' ;;
+    gpu_throttle) printf '\xf3\xb0\x80\xa9' ;;
+    gpu_pstate) printf '\xf3\xb0\x98\xae' ;;
+    gpu_top_process) printf '\xf3\xb0\xa3\x86' ;;
+    gram_percentage) printf '\xf3\xb0\x8d\x9b' ;;
+    gram_used) printf '\xf3\xb0\x8d\x9b' ;;
+    *) printf '' ;;
+  esac
+}
+
+gpu_option_exists() {
+  [[ -n "$(tmux show-option -gq "${1}" 2>/dev/null)" ]]
+}
+
+gpu_label() {
+  local option="@gpu_revamped_${1#gpu_}_label"
+  if gpu_option_exists "${option}"; then
+    tmux show-option -gqv "${option}" 2>/dev/null
+  elif [[ "$(get_tmux_option "@gpu_revamped_icons" "ascii")" == "nerd" ]]; then
+    gpu_nerd_label "${1}"
+  fi
+}
+
+gpu_labelled() {
+  local metric="${1}" value="${2}" label
+  [[ -n "${value}" ]] || return 0
+  label="$(gpu_label "${metric}")"
+  if [[ -n "${label}" ]]; then
+    printf '%s %s\n' "${label}" "${value}"
+  else
+    printf '%s\n' "${value}"
+  fi
+}
+
+main() {
+  local cmd="${1:-}"
+
+  case "${cmd}" in
+    refresh) gpu_refresh; return 0 ;;
+    popup)   gpu_popup; return 0 ;;
+    doctor)  gpu_doctor; return 0 ;;
+  esac
+
+  gpu_tick
+
+  local out
+  out="$(gpu_render_metric "${cmd}")"
+  if gpu_is_labelled "${cmd}"; then
+    gpu_labelled "${cmd}" "${out}"
+  elif [[ -n "${out}" ]]; then
+    printf '%s\n' "${out}"
+  fi
 }
 
 if [[ "${BASH_SOURCE[0]}" == "${0}" ]]; then

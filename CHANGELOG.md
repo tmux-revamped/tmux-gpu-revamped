@@ -5,6 +5,14 @@ All notable changes to this project are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+
+### Added
+
+- Metric labels. `@gpu_revamped_<metric>_label` prints an icon or word before a
+  value only when the value is not empty, and `@gpu_revamped_icons` set to
+  `nerd` labels every metric from a Nerd Font set. The default adds no labels.
+
 ## [1.2.0] - 2026-06-29
 
 ### Added
