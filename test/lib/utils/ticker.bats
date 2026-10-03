@@ -150,3 +150,191 @@ wait_for_file() {
 
   [ "${status}" -eq 0 ]
 }
+
+@test "ticker - a plugin interval option wins over the fallback" {
+  tmux set-option -gq "@demo_interval" "12"
+
+  run ticker_interval demo 30
+
+  [[ "${output}" == "12" ]]
+}
+
+@test "ticker - the fallback applies when the plugin sets no interval" {
+  run ticker_interval demo 30
+
+  [[ "${output}" == "30" ]]
+}
+
+@test "ticker - an invalid plugin interval falls back to status-interval" {
+  tmux set-option -gq "@demo_interval" "soon"
+  stub_status_interval 4
+
+  run ticker_interval demo ""
+
+  [[ "${output}" == "4" ]]
+}
+
+@test "ticker - minute wakes one second after the next minute starts" {
+  _ticker_second_of_minute() { printf '08'; }
+
+  run ticker_interval demo minute
+
+  [[ "${output}" == "53" ]]
+}
+
+@test "ticker - an unreadable second still yields a full minute" {
+  _ticker_second_of_minute() { printf 'xx'; }
+
+  run ticker_seconds_to_next_minute
+
+  [[ "${output}" == "61" ]]
+}
+
+@test "ticker - run sleeps for the plugin fallback interval" {
+  TICKER_MAX_TICKS=1
+
+  ticker_run demo record_tick 4242 30
+
+  [[ "$(grep -c '^sleep 30$' "${TICK_LOG}")" == "1" ]]
+}
+
+@test "ticker - the second-of-minute seam reads the clock" {
+  run _ticker_second_of_minute
+
+  [[ "${output}" =~ ^[0-9]{2}$ ]]
+}
+
+stub_ticker_tmux() {
+  export TMUX_LOG="${TEST_TMPDIR}/tmux.log"
+  _ticker_tmux() {
+    printf '%s\n' "$*" >> "${TMUX_LOG}"
+    case "${1} ${2:-} ${3:-}" in
+      "show-option -gqv @demo_option_names") printf '%s' "${STUB_NAMES:-}" ;;
+      "show-option -gqv @alpha") printf 'one' ;;
+      "display-message -p "*) printf '%s' "${STUB_VALUES:-}" ;;
+    esac
+    return 0
+  }
+}
+
+@test "ticker - an option is read from tmux once and its name is learned" {
+  stub_ticker_tmux
+  TICKER_PREFIX="demo"
+
+  ticker_get_option "@alpha" "fallback" >/dev/null
+
+  [[ "$(paste -sd'|' "${TMUX_LOG}")" == "show-option -gqv @alpha|set-option -gqa @demo_option_names  @alpha" ]]
+}
+
+@test "ticker - a learned option is served from memory" {
+  stub_ticker_tmux
+  TICKER_PREFIX="demo"
+  ticker_get_option "@alpha" "" >/dev/null
+  : > "${TMUX_LOG}"
+
+  run ticker_get_option "@alpha" ""
+
+  [[ "${output}" == "one" ]]
+  [ ! -s "${TMUX_LOG}" ]
+}
+
+@test "ticker - an empty option returns the default" {
+  stub_ticker_tmux
+  TICKER_PREFIX="demo"
+
+  run ticker_get_option "@empty" "fallback"
+
+  [[ "${output}" == "fallback" ]]
+}
+
+@test "ticker - a write reaches tmux and the memory copy" {
+  stub_ticker_tmux
+  ticker_set_option "@beta" "two"
+
+  run ticker_get_option "@beta" ""
+
+  [[ "${output}" == "two" ]]
+  [[ "$(head -1 "${TMUX_LOG}")" == "set-option -gq @beta two" ]]
+}
+
+@test "ticker - prefetch reads every learned option in one call" {
+  stub_ticker_tmux
+  TICKER_PREFIX="demo"
+  export STUB_NAMES=" @a @b @a"
+  export STUB_VALUES=$'1\x1f2 two\x1f'
+
+  ticker_prefetch
+
+  [[ "${TICKER_OPT_COUNT}" == "2" ]]
+  [[ "${TICKER_OPT_VALUES[1]}" == "2 two" ]]
+  [[ "$(grep -c '^display-message' "${TMUX_LOG}")" == "1" ]]
+}
+
+@test "ticker - prefetch drops the snapshot when fields are missing" {
+  stub_ticker_tmux
+  TICKER_PREFIX="demo"
+  export STUB_NAMES=" @a @b"
+  export STUB_VALUES=$'1\x1f'
+
+  ticker_prefetch
+
+  [[ "${TICKER_OPT_COUNT}" == "0" ]]
+}
+
+@test "ticker - prefetch with no learned names makes no display call" {
+  stub_ticker_tmux
+  TICKER_PREFIX="demo"
+
+  ticker_prefetch
+
+  [[ "$(grep -c '^display-message' "${TMUX_LOG}")" == "0" ]]
+}
+
+@test "ticker - install routes option reads through the snapshot" {
+  stub_ticker_tmux
+  ticker_install demo
+
+  run get_tmux_option "@alpha" ""
+
+  [[ "${output}" == "one" ]]
+}
+
+@test "ticker - install reads the clock from EPOCHSECONDS when bash has it" {
+  stub_ticker_tmux
+  EPOCHSECONDS="${EPOCHSECONDS:-1700000000}"
+
+  ticker_install demo
+
+  [[ "$(declare -f _cache_now)" == *'EPOCHSECONDS'* ]]
+}
+
+@test "ticker - unexport keeps functions defined but out of the environment" {
+  demo_exported() { return 0; }
+  export -f demo_exported
+
+  ticker_unexport_functions
+
+  declare -F demo_exported >/dev/null
+  [[ -z "$(env | grep '^BASH_FUNC_demo_exported')" ]]
+}
+
+@test "ticker - a write outside the main shell goes straight to tmux" {
+  stub_ticker_tmux
+  TICKER_MAIN_PID=""
+
+  ticker_set_option "@gamma" "3"
+
+  [[ "$(head -1 "${TMUX_LOG}")" == "set-option -gq @gamma 3" ]]
+}
+
+@test "ticker - a write in the main shell joins the publish batch" {
+  stub_ticker_tmux
+  publish_add_raw() { printf '%s=%s\n' "${1}" "${2}" >> "${TEST_TMPDIR}/batch"; }
+  TICKER_MAIN_PID="${BASHPID:-main}"
+  [[ -n "${BASHPID:-}" ]] || skip "this bash has no BASHPID"
+
+  ticker_set_option "@gamma" "3"
+
+  [[ "$(cat "${TEST_TMPDIR}/batch")" == "@gamma=3" ]]
+  [ ! -s "${TMUX_LOG}" ]
+}

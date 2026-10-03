@@ -38,17 +38,11 @@ publish_width() {
   fi
 }
 
-publish_escape() {
-  local value="${1//%/%%}"
+publish_add_raw() {
+  local option="${1}" value="${2}" pane="${3:-}"
   if [[ "${value}" == *";" ]]; then
     value="${value%;}\\;"
   fi
-  printf '%s' "${value}"
-}
-
-publish_add() {
-  local option="${1}" value pane="${3:-}"
-  value="$(publish_escape "${2}")"
   if ((PUBLISH_PENDING > 0)); then
     PUBLISH_BATCH+=(";")
   fi
@@ -58,6 +52,10 @@ publish_add() {
     PUBLISH_BATCH+=(set-option -gq "${option}" "${value}")
   fi
   PUBLISH_PENDING=$((PUBLISH_PENDING + 1))
+}
+
+publish_add() {
+  publish_add_raw "${1}" "${2//%/%%}" "${3:-}"
 }
 
 publish_commit() {

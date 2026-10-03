@@ -58,24 +58,28 @@ gpu_graph() {
   render_sparkline "$(get_tmux_option "@gpu_revamped_util_history" "")"
 }
 
+gpu_detail_age() {
+  get_tmux_option "@gpu_revamped_detail_interval" "60"
+}
+
 gpu_refresh() {
   local vram util
   vram="$(read_vram)"
   util="$(read_gpu_usage)"
   cache_set util "${util}"
-  cache_set temp "$(read_gpu_temp)"
-  cache_set freq "$(read_gpu_freq)"
+  cache_set_if_stale temp "$(gpu_detail_age)" read_gpu_temp
+  cache_set_if_stale freq "$(gpu_detail_age)" read_gpu_freq
   cache_set gram "$(gram_pct_from_pair "${vram}")"
   cache_set gram_used "$(vram_used "${vram}")"
   cache_set gram_total "$(vram_total "${vram}")"
-  cache_set power "$(read_power)"
-  cache_set power_pct "$(read_power_pct)"
-  cache_set fan "$(read_fan)"
-  cache_set enc "$(read_gpu_enc)"
-  cache_set dec "$(read_gpu_dec)"
-  cache_set throttle "$(read_gpu_throttle)"
-  cache_set pstate "$(read_gpu_pstate)"
-  cache_set top_process "$(read_gpu_top_process)"
+  cache_set_if_stale power "$(gpu_detail_age)" read_power
+  cache_set_if_stale power_pct "$(gpu_detail_age)" read_power_pct
+  cache_set_if_stale fan "$(gpu_detail_age)" read_fan
+  cache_set_if_stale enc "$(gpu_detail_age)" read_gpu_enc
+  cache_set_if_stale dec "$(gpu_detail_age)" read_gpu_dec
+  cache_set_if_stale throttle "$(gpu_detail_age)" read_gpu_throttle
+  cache_set_if_stale pstate "$(gpu_detail_age)" read_gpu_pstate
+  cache_set_if_stale top_process "$(gpu_detail_age)" read_gpu_top_process
   gpu_history_push "${util}"
 }
 
@@ -204,7 +208,7 @@ gpu_publish() {
 _gpu_reexec() { exec "${PLUGIN_DIR}/src/gpu.sh" daemon; }
 
 gpu_daemon() {
-  if ticker_run gpu_revamped gpu_publish "$$"; then
+  if ticker_run gpu_revamped gpu_publish "$$" 5; then
     _gpu_reexec
   fi
 }

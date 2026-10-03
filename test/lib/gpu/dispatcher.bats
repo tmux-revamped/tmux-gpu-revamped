@@ -382,3 +382,22 @@ teardown() {
 
   [ ! -f "${TEST_TMPDIR}/daemon" ]
 }
+
+@test "gpu dispatcher - a detail probe keeps its cache inside the detail interval" {
+  gpu_refresh
+  read_gpu_temp() { echo "probed" > "${TEST_TMPDIR}/probed"; echo "fresh"; }
+
+  gpu_refresh
+
+  [ ! -f "${TEST_TMPDIR}/probed" ]
+}
+
+@test "gpu dispatcher - a detail probe runs again after the detail interval" {
+  gpu_refresh
+  read_gpu_temp() { echo "fresh"; }
+  export MOCK_EPOCH=$(( MOCK_EPOCH + 61 ))
+
+  gpu_refresh
+
+  [[ "$(cache_get temp)" == "fresh" ]]
+}

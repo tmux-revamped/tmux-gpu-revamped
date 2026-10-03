@@ -95,24 +95,6 @@ logged_words() {
   [[ "${output}" == "4" ]]
 }
 
-@test "publish - a trailing semicolon is escaped" {
-  run publish_escape "x;"
-
-  [[ "${output}" == 'x\;' ]]
-}
-
-@test "publish - a percent sign is doubled so strftime keeps it" {
-  run publish_escape "100%#[fg=red]"
-
-  [[ "${output}" == "100%%#[fg=red]" ]]
-}
-
-@test "publish - a value without a trailing semicolon is unchanged" {
-  run publish_escape "a;b"
-
-  [[ "${output}" == "a;b" ]]
-}
-
 @test "publish - commit sends every option in one call" {
   publish_add "@a" "1"
   publish_add "@b" "2%"
@@ -162,4 +144,36 @@ logged_words() {
   run _publish_tmux show-option -gqv "@missing"
 
   [ "${status}" -eq 0 ]
+}
+
+@test "publish - a trailing semicolon is escaped" {
+  publish_add_raw "@a" "x;"
+
+  publish_commit
+
+  [[ "$(logged_words)" == 'set-option|-gq|@a|x\;' ]]
+}
+
+@test "publish - a semicolon inside a value is kept" {
+  publish_add_raw "@a" "a;b"
+
+  publish_commit
+
+  [[ "$(logged_words)" == "set-option|-gq|@a|a;b" ]]
+}
+
+@test "publish - a displayed value doubles its percent signs" {
+  publish_add "@a" "100%#[fg=red]"
+
+  publish_commit
+
+  [[ "$(logged_words)" == "set-option|-gq|@a|100%%#[fg=red]" ]]
+}
+
+@test "publish - a raw value keeps its percent signs" {
+  publish_add_raw "@a" "100%"
+
+  publish_commit
+
+  [[ "$(logged_words)" == "set-option|-gq|@a|100%" ]]
 }

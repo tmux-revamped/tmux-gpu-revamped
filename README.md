@@ -109,7 +109,7 @@ Set `@gpu_revamped_fixed_width` to `on` to pad every value on the left to the wi
 
 ### Render mode
 
-By default each placeholder becomes a `#()` call, and tmux runs it on every status redraw, which can be about once a second when several plugins share the bar. Set `@gpu_revamped_render` to `options` and each placeholder becomes a read of a tmux option instead, such as `#{E:@gpu_revamped_out_percentage}`. One background process per server samples the GPU every `status-interval` seconds, writes every value the status line uses in a single tmux call, and redraws once, so values change together and nothing renders empty while a job runs. The process exits after its current tick when the server stops, and a config reload replaces it.
+By default each placeholder becomes a `#()` call, and tmux runs it on every status redraw, which can be about once a second when several plugins share the bar. Set `@gpu_revamped_render` to `options` and each placeholder becomes a read of a tmux option instead, such as `#{E:@gpu_revamped_out_percentage}`. One background process per server samples the GPU every `@gpu_revamped_interval` seconds, 5 by default, writes every value the status line uses in a single tmux call, and redraws once, so values change together and nothing renders empty while a job runs. The process exits after its current tick when the server stops, and a config reload replaces it.
 
 ```tmux
 set -g @gpu_revamped_render 'options'
