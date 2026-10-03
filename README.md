@@ -212,15 +212,20 @@ set -g @gpu_revamped_gram_high_fg_color '#[fg=#dc322f]'
 | Linux + NVIDIA (`nvidia-smi`) | yes | yes | yes | yes |
 | Linux + AMD (`rocm-smi`) | yes | yes | yes | no |
 | Linux + Intel or generic (`/sys/class/drm`) | yes | yes | yes | no |
-| macOS Apple Silicon | yes, `ioreg` | no, see note | yes, chip table | no |
-| macOS Intel | yes, `ioreg` | no, see note | yes, model table | no |
+| macOS Apple Silicon | yes, `ioreg` | yes, `macmon` | yes, chip table | no |
+| macOS Intel | yes, `ioreg` | yes, `osx-cpu-temp -g` | yes, model table | no |
 
-Verified on an Apple M3 Max: load reads through `ioreg` and frequency comes from a
-per-chip clock table, so the GPU placeholders are populated even though there is no
-`nvidia-smi`. GPU temperature on macOS is not available without elevated access: istats has no
-GPU category and powermetrics needs sudo, so the macOS GPU temperature placeholder
-stays empty (validated on an Apple M3 Max). GPU temperature works on Linux. GPU memory (`gram`) is NVIDIA only. Any metric with no source on
-the host renders empty and never errors.
+Verified on an Apple M3 Max: load reads through `ioreg` and frequency comes from a per-chip clock table, so the GPU placeholders are populated even though there is no `nvidia-smi`.
+
+GPU temperature on macOS needs one optional helper:
+
+| Platform | Install | Source |
+|---|---|---|
+| macOS Apple Silicon | `brew install macmon` | `macmon pipe -s 1`, sudoless, the `gpu_temp_avg` field |
+| macOS Intel | `brew install osx-cpu-temp` | `osx-cpu-temp -g`, the GPU SMC key; `gem install iStats` also works |
+| Linux | none | `nvidia-smi`, `/sys/class/drm` hwmon, or `rocm-smi` |
+
+Temperatures are whole degrees. GPU memory (`gram`) is NVIDIA only. Any metric with no source on the host renders empty and never errors.
 
 ## Development
 

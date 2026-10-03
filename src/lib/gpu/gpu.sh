@@ -67,6 +67,22 @@ gpu_temp_from_rocm() {
 }
 
 # gpu_temp_from_istats TEXT -> integer Celsius from `istats gpu temp`.
+gpu_round_celsius() {
+  local pattern='^[^0-9]*([0-9]+)(\.([0-9]))?' whole tenth
+  [[ "${1}" =~ ${pattern} ]] || return 0
+  whole=$((10#${BASH_REMATCH[1]}))
+  tenth="${BASH_REMATCH[3]:-0}"
+  ((whole > 0 || tenth > 0)) || return 0
+  ((tenth >= 5)) && whole=$((whole + 1))
+  printf '%s\n' "${whole}"
+}
+
+gpu_temp_from_macmon() {
+  local pattern='"gpu_temp_avg":([0-9.]+)'
+  [[ "${1}" =~ ${pattern} ]] || return 0
+  gpu_round_celsius "${BASH_REMATCH[1]}"
+}
+
 gpu_temp_from_istats() {
   printf '%s\n' "${1}" | awk '/GPU/ {for(i=1;i<=NF;i++) if($i ~ /[0-9]/) {gsub(/[^0-9.]/, "", $i); if($i != "") {print int($i); exit}}}'
 }
@@ -286,6 +302,8 @@ _read_rocm_usage() { rocm-smi -u 2>/dev/null; }
 _read_nvidia_temp() { nvidia-smi --query-gpu=temperature.gpu --format=csv,noheader,nounits 2>/dev/null; }
 _read_rocm_temp() { rocm-smi -t 2>/dev/null; }
 _read_istats_gpu() { istats gpu temp 2>/dev/null; }
+_read_macmon() { macmon pipe -s 1 -i 200 2>/dev/null; }
+_read_osx_gpu_temp() { osx-cpu-temp -C -g 2>/dev/null; }
 _read_nvidia_freq() { nvidia-smi --query-gpu=clocks.current.graphics --format=csv,noheader,nounits 2>/dev/null; }
 _read_rocm_freq() { rocm-smi --showclocks 2>/dev/null; }
 _read_nvidia_mem() { nvidia-smi --query-gpu=memory.used,memory.total --format=csv,noheader,nounits 2>/dev/null | head -1; }
@@ -342,7 +360,17 @@ read_gpu_usage() {
 
 read_gpu_temp() {
   if is_macos; then
-    has_command istats && gpu_temp_from_istats "$(_read_istats_gpu)"
+    local t=""
+    if is_apple_silicon && has_command macmon; then
+      t=$(gpu_temp_from_macmon "$(_read_macmon)")
+    fi
+    if [[ -z "${t}" ]] && has_command osx-cpu-temp; then
+      t=$(gpu_round_celsius "$(_read_osx_gpu_temp)")
+    fi
+    if [[ -z "${t}" ]] && has_command istats; then
+      t=$(gpu_temp_from_istats "$(_read_istats_gpu)")
+    fi
+    [[ -n "${t}" ]] && echo "${t}"
   elif is_linux; then
     if has_command nvidia-smi; then
       local v; v=$(gpu_temp_from_nvidia "$(_read_nvidia_temp)"); [[ -n "${v}" ]] && { echo "${v}"; return 0; }
@@ -464,6 +492,7 @@ export -f power_from_nvidia power_pct_from_nvidia power_from_rocm
 export -f fan_from_nvidia fan_from_rocm enc_from_nvidia dec_from_nvidia
 export -f throttle_from_nvidia pstate_from_nvidia top_process_from_nvidia
 export -f _read_ioreg_gpu _read_nvidia_usage _read_rocm_usage _read_nvidia_temp _read_rocm_temp
+export -f gpu_round_celsius gpu_temp_from_macmon _read_macmon _read_osx_gpu_temp
 export -f _read_istats_gpu _read_nvidia_freq _read_rocm_freq _read_nvidia_mem _read_rocm_mem
 export -f _read_apple_mem_total _read_nvidia_power _read_rocm_power _read_nvidia_fan _read_rocm_fan
 export -f _read_nvidia_encdec _read_nvidia_throttle _read_nvidia_pstate _read_nvidia_procs

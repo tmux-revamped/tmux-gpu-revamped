@@ -504,3 +504,53 @@ GPU[0]		: VRAM Total Used Memory (B): 1073741824'
   run _read_sys_vram_total
   true
 }
+
+@test "gpu.sh - gpu_temp_from_macmon rounds the GPU average" {
+  run gpu_temp_from_macmon '{"temp":{"cpu_temp_avg":71.9,"gpu_temp_avg":57.5}}'
+
+  [[ "${output}" == "58" ]]
+}
+
+@test "gpu.sh - gpu_temp_from_macmon is empty without a temperature" {
+  run gpu_temp_from_macmon '{"gpu_power":0.1}'
+
+  [[ -z "${output}" ]]
+}
+
+@test "gpu.sh - gpu_round_celsius treats a zero reading as none" {
+  run gpu_round_celsius "0.0°C"
+
+  [[ -z "${output}" ]]
+}
+
+@test "gpu.sh - read_gpu_temp uses macmon on Apple Silicon" {
+  _PLATFORM_OS_CACHE="Darwin"
+  _PLATFORM_ARCH_CACHE="arm64"
+  has_command() { [[ "${1}" == "macmon" ]]; }
+  _read_macmon() { printf '{"temp":{"gpu_temp_avg":49.2}}'; }
+
+  run read_gpu_temp
+
+  [[ "${output}" == "49" ]]
+}
+
+@test "gpu.sh - read_gpu_temp reads osx-cpu-temp on Intel" {
+  _PLATFORM_OS_CACHE="Darwin"
+  _PLATFORM_ARCH_CACHE="x86_64"
+  has_command() { [[ "${1}" == "osx-cpu-temp" ]]; }
+  _read_osx_gpu_temp() { printf '44.6°C'; }
+
+  run read_gpu_temp
+
+  [[ "${output}" == "45" ]]
+}
+
+@test "gpu.sh - read_gpu_temp is empty on macOS without a helper" {
+  _PLATFORM_OS_CACHE="Darwin"
+  _PLATFORM_ARCH_CACHE="arm64"
+  has_command() { return 1; }
+
+  run read_gpu_temp
+
+  [[ -z "${output}" ]]
+}

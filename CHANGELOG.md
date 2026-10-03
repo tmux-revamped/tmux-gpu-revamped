@@ -9,6 +9,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- GPU temperature on macOS: `macmon` on Apple Silicon, read without sudo,
+  and `osx-cpu-temp -g` on Intel, ahead of the `istats` fallback.
 - `@gpu_revamped_render 'options'` replaces the `#()` calls with tmux option
   reads, written by one background process per server every
   `@gpu_revamped_interval` seconds, 5 by default. tmux reruns a `#()` call on every redraw, so a
