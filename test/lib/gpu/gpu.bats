@@ -5,6 +5,7 @@ load "${BATS_TEST_DIRNAME}/../../helpers.bash"
 setup() {
   setup_test_environment
   unset _GPU_REVAMPED_GPU_LOADED
+  unset _GPU_REVAMPED_TEMPERATURE_LOADED
   source "${BATS_TEST_DIRNAME}/../../../src/lib/gpu/gpu.sh"
 }
 
