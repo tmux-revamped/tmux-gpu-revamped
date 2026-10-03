@@ -56,3 +56,12 @@ teardown() {
 
   [[ "$(cat "$(_mock_opt_file @gpu_revamped_published)")" == "gpu_percentage" ]]
 }
+
+@test "entry - a second run keeps metrics already turned into option reads" {
+  tmux set-option -gq "@gpu_revamped_render" "options"
+  tmux set-option -gq "status-right" "[#{E:@gpu_revamped_out_gpu_percentage}]"
+
+  bash "${ENTRY}"
+
+  [[ "$(cat "$(_mock_opt_file @gpu_revamped_published)")" == "gpu_percentage" ]]
+}
