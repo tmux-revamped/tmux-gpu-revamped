@@ -74,7 +74,7 @@ tmux() {
         case "$1" in
           -gqv|-wqv|-pqv|-gq|-g|-q|-w|-p) ;;
           -t) shift ;;
-          @*) name="$1" ;;
+          *) name="$1" ;;
         esac
         shift
       done

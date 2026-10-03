@@ -105,6 +105,18 @@ Press `prefix + I` to install.
 
 Every value placeholder can carry a label, an icon or word printed before the value only when the value is not empty. Set `@gpu_revamped_<metric>_label`, where the metric is the placeholder name without its `gpu_` prefix, such as `@gpu_revamped_percentage_label`, or set `@gpu_revamped_icons` to `nerd` to label every metric from a Nerd Font set. A metric's own label wins over the set, and `''` removes the set's label for that metric. The default, `ascii`, adds no labels.
 
+Set `@gpu_revamped_fixed_width` to `on` to pad every value on the left to the widest it can get, such as four characters for a percentage, so a value that changes length, like `9%` becoming `42%`, never shifts the rest of a right-aligned status line. `@gpu_revamped_<metric>_width` sets one metric's width and wins over the fixed width. A longer value is never cut. Both are off by default.
+
+### Render mode
+
+By default each placeholder becomes a `#()` call, and tmux runs it on every status redraw, which can be about once a second when several plugins share the bar. Set `@gpu_revamped_render` to `options` and each placeholder becomes a read of a tmux option instead, such as `#{E:@gpu_revamped_out_percentage}`. One background process per server samples the GPU every `status-interval` seconds, writes every value the status line uses in a single tmux call, and redraws once, so values change together and nothing renders empty while a job runs. The process exits after its current tick when the server stops, and a config reload replaces it.
+
+```tmux
+set -g @gpu_revamped_render 'options'
+set -g @gpu_revamped_fixed_width 'on'
+```
+
+
 ## Theme color suggestions
 
 The defaults leave the tier colors empty, so each metric inherits its tier color from the 16 ANSI names your active theme already remaps, which matches any theme out of the box. For exact hex instead of remapped ANSI, copy one block below. Each tier maps low to green, medium to yellow, and high to red, across the load, temperature, and GPU memory families.

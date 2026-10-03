@@ -23,6 +23,10 @@ source "${PLUGIN_DIR}/src/lib/tmux/tmux-ops.sh"
 # shellcheck source=/dev/null
 source "${PLUGIN_DIR}/src/lib/utils/cache.sh"
 # shellcheck source=/dev/null
+source "${PLUGIN_DIR}/src/lib/utils/publish.sh"
+# shellcheck source=/dev/null
+source "${PLUGIN_DIR}/src/lib/utils/ticker.sh"
+# shellcheck source=/dev/null
 source "${PLUGIN_DIR}/src/lib/gpu/gpu.sh"
 # shellcheck source=/dev/null
 source "${PLUGIN_DIR}/src/lib/gpu/render.sh"
@@ -82,6 +86,8 @@ gpu_tick() {
 gpu_render_metric() {
   local cmd="${1}"
   case "${cmd}" in
+    start)   ticker_start "${PLUGIN_DIR}/src/gpu.sh"; return 0 ;;
+    daemon)  gpu_daemon; return 0 ;;
     gpu_percentage)    metric_value "$(cache_get util)" "@gpu_revamped_percentage_format" "%s%%" ;;
     gpu_icon)          metric_icon "$(cache_get util)" "gpu_revamped" 30 80 "▰▱▱" "▰▰▱" "▰▰▰" ;;
     gpu_fg_color)      metric_color "$(cache_get util)" "gpu_revamped" 30 80 fg ;;
@@ -149,14 +155,59 @@ gpu_label() {
   fi
 }
 
+gpu_natural_width() {
+  case "${1}" in
+    gpu_percentage) printf '4' ;;
+    gpu_temp) printf '5' ;;
+    gram_percentage) printf '4' ;;
+    gpu_power_pct) printf '4' ;;
+    gpu_fan) printf '4' ;;
+    gpu_enc) printf '4' ;;
+    gpu_dec) printf '4' ;;
+    *) printf '0' ;;
+  esac
+}
+
+gpu_padded() {
+  publish_pad "${2}" "$(publish_width gpu_revamped "${1#gpu_}" "$(gpu_natural_width "${1}")")"
+}
+
 gpu_labelled() {
   local metric="${1}" value="${2}" label
   [[ -n "${value}" ]] || return 0
+  value="$(gpu_padded "${metric}" "${value}")"
   label="$(gpu_label "${metric}")"
   if [[ -n "${label}" ]]; then
     printf '%s %s\n' "${label}" "${value}"
   else
     printf '%s\n' "${value}"
+  fi
+}
+
+gpu_output() {
+  local metric="${1}" out
+  out="$(gpu_render_metric "${metric}")"
+  if gpu_is_labelled "${metric}"; then
+    gpu_labelled "${metric}" "${out}"
+  elif [[ -n "${out}" ]]; then
+    printf '%s\n' "${out}"
+  fi
+}
+
+gpu_publish() {
+  local metric
+  gpu_refresh
+  for metric in $(get_tmux_option "@gpu_revamped_published" ""); do
+    publish_add "@gpu_revamped_out_${metric}" "$(gpu_output "${metric}")"
+  done
+  publish_commit
+}
+
+_gpu_reexec() { exec "${PLUGIN_DIR}/src/gpu.sh" daemon; }
+
+gpu_daemon() {
+  if ticker_run gpu_revamped gpu_publish "$$"; then
+    _gpu_reexec
   fi
 }
 
@@ -170,14 +221,7 @@ main() {
   esac
 
   gpu_tick
-
-  local out
-  out="$(gpu_render_metric "${cmd}")"
-  if gpu_is_labelled "${cmd}"; then
-    gpu_labelled "${cmd}" "${out}"
-  elif [[ -n "${out}" ]]; then
-    printf '%s\n' "${out}"
-  fi
+  gpu_output "${cmd}"
 }
 
 if [[ "${BASH_SOURCE[0]}" == "${0}" ]]; then
