@@ -39,7 +39,7 @@ publish_width() {
 }
 
 publish_escape() {
-  local value="${1}"
+  local value="${1//%/%%}"
   if [[ "${value}" == *";" ]]; then
     value="${value%;}\\;"
   fi

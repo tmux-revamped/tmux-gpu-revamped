@@ -101,6 +101,12 @@ logged_words() {
   [[ "${output}" == 'x\;' ]]
 }
 
+@test "publish - a percent sign is doubled so strftime keeps it" {
+  run publish_escape "100%#[fg=red]"
+
+  [[ "${output}" == "100%%#[fg=red]" ]]
+}
+
 @test "publish - a value without a trailing semicolon is unchanged" {
   run publish_escape "a;b"
 
@@ -109,11 +115,11 @@ logged_words() {
 
 @test "publish - commit sends every option in one call" {
   publish_add "@a" "1"
-  publish_add "@b" "2"
+  publish_add "@b" "2%"
 
   publish_commit
 
-  [[ "$(logged_words)" == "set-option|-gq|@a|1|;|set-option|-gq|@b|2" ]]
+  [[ "$(logged_words)" == "set-option|-gq|@a|1|;|set-option|-gq|@b|2%%" ]]
 }
 
 @test "publish - a pane value targets that pane" {
