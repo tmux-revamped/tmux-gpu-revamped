@@ -374,3 +374,11 @@ teardown() {
 
   [[ "$(cat "${TEST_TMPDIR}/spawn")" == *"/src/gpu.sh" ]]
 }
+
+@test "gpu dispatcher - the metric renderer does not start the daemon" {
+  gpu_daemon() { echo "daemon" > "${TEST_TMPDIR}/daemon"; }
+
+  gpu_render_metric daemon >/dev/null
+
+  [ ! -f "${TEST_TMPDIR}/daemon" ]
+}

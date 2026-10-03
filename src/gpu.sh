@@ -86,8 +86,6 @@ gpu_tick() {
 gpu_render_metric() {
   local cmd="${1}"
   case "${cmd}" in
-    start)   ticker_start "${PLUGIN_DIR}/src/gpu.sh"; return 0 ;;
-    daemon)  gpu_daemon; return 0 ;;
     gpu_percentage)    metric_value "$(cache_get util)" "@gpu_revamped_percentage_format" "%s%%" ;;
     gpu_icon)          metric_icon "$(cache_get util)" "gpu_revamped" 30 80 "▰▱▱" "▰▰▱" "▰▰▰" ;;
     gpu_fg_color)      metric_color "$(cache_get util)" "gpu_revamped" 30 80 fg ;;
@@ -215,6 +213,8 @@ main() {
   local cmd="${1:-}"
 
   case "${cmd}" in
+    start) ticker_start "${PLUGIN_DIR}/src/gpu.sh"; return 0 ;;
+    daemon) gpu_daemon; return 0 ;;
     refresh) gpu_refresh; return 0 ;;
     popup)   gpu_popup; return 0 ;;
     doctor)  gpu_doctor; return 0 ;;
