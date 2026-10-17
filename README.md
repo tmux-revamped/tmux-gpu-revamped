@@ -97,9 +97,19 @@ Press `prefix + I` to install.
 | `@gpu_revamped_pstate_format` | `%s` | format for the performance state |
 | `@gpu_revamped_top_process_format` | `%s` | format for the top compute app |
 | `@gpu_revamped_history_size` | `20` | samples kept for `#{gpu_graph}` |
+| `@gpu_revamped_detail_interval` | `60` | seconds the temperature, clock, power, fan, encoder, decoder, throttle, performance state and top process readings stay cached between refreshes |
 | `@gpu_revamped_popup_key` | empty | prefix key that opens the GPU detail popup |
 | `@gpu_revamped_popup_command` | auto | command run in the popup (nvtop, vendor smi, or btop, then `top` when none is installed) |
 | `@gpu_revamped_popup_width` / `@gpu_revamped_popup_height` | `80%` | popup size |
+
+### Internal state
+
+The plugin manages these options itself. Do not set them.
+
+| Option | Holds |
+|--------|-------|
+| `@gpu_revamped_util_history` | the recent load samples, at most `@gpu_revamped_history_size`, that `#{gpu_graph}` draws |
+| `@gpu_revamped_published` | space-separated metrics the status line uses, written at load so the `options` render mode publishes only those |
 
 ## Labels
 
