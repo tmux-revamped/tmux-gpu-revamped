@@ -59,6 +59,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - The `doctor` report told every Apple Silicon user that GPU temperature needs
   sudo, even with `macmon` installed and supplying it. It now reports whether
   `macmon` is present and asks for it only when it is missing.
+- The render mode section named the option `@gpu_revamped_out_percentage`,
+  which nothing writes. The option is `@gpu_revamped_out_gpu_percentage`.
 
 ## [1.2.0] - 2026-06-29
 
