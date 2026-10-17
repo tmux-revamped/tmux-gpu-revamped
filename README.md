@@ -8,7 +8,7 @@
 
 </div>
 
-**23** placeholders · **4** vendors · **193** tests · **95%+** coverage
+**23** placeholders · **4** vendors · **95%+** coverage
 
 GPU load, temperature, frequency, and memory in your tmux status line across NVIDIA, AMD, Intel, and Apple Silicon. A detached background worker probes the GPU and writes values to tmux server user-options, so the status render never blocks and no temp files are written. When a metric has no source on the host the matching placeholders render empty.
 
@@ -21,7 +21,7 @@ Built from [tmux-plugin-template](https://github.com/tmux-revamped/tmux-plugin-t
 </tr>
 <tr>
 <td><b>Four GPU vendors</b><br/>NVIDIA, AMD, Intel, and Apple Silicon, each with its own probe path.</td>
-<td><b>Tested</b><br/>193 bats tests hold coverage above 95 percent.</td>
+<td><b>Tested</b><br/>bats tests hold coverage above 95 percent.</td>
 </tr>
 </table>
 
