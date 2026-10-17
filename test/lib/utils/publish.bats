@@ -1,5 +1,4 @@
 #!/usr/bin/env bats
-# shellcheck disable=SC1090
 
 load "${BATS_TEST_DIRNAME}/../../helpers.bash"
 
@@ -8,6 +7,7 @@ PUBLISH_LIB="${BATS_TEST_DIRNAME}/../../../src/lib/utils/publish.sh"
 setup() {
   setup_test_environment
   unset _TMUX_PLUGIN_PUBLISH_LOADED
+  # shellcheck source=/dev/null
   source "${PUBLISH_LIB}"
   PUBLISH_LOG="${TEST_TMPDIR}/publish.log"
   export PUBLISH_LOG
@@ -140,6 +140,7 @@ logged_words() {
 @test "publish - the tmux seam calls tmux" {
   unset -f _publish_tmux
   unset _TMUX_PLUGIN_PUBLISH_LOADED
+  # shellcheck source=/dev/null
   source "${PUBLISH_LIB}"
 
   run _publish_tmux show-option -gqv "@missing"
@@ -179,13 +180,27 @@ logged_words() {
   [[ "$(logged_words)" == "set-option|-gq|@a|100%" ]]
 }
 
-@test "publish - escape doubles every hash so tmux renders it literally" {
+@test "publish - escape doubles every hash so tmux prints it literally" {
   # Arrange
-  local raw="#(rm -rf ~) #[fg=red]##"
+  local value='#[fg=red]#(id)#'
 
   # Act
-  run publish_escape "${raw}"
+  run publish_escape "${value}"
 
   # Assert
-  [[ "${output}" == "##(rm -rf ~) ##[fg=red]####" ]]
+  [[ "${output}" == '##[fg=red]##(id)##' ]]
+}
+
+@test "publish - chars counts in the shell without spawning a pipeline" {
+  # Arrange
+  export TR_LOG="${TEST_TMPDIR}/tr.log"
+  tr() { printf 'tr\n' >> "${TR_LOG}"; }
+  wc() { printf 'wc\n' >> "${TR_LOG}"; }
+
+  # Act
+  run publish_chars "45°C"
+
+  # Assert
+  [[ "${output}" == "4" ]] || false
+  [ ! -f "${TR_LOG}" ]
 }

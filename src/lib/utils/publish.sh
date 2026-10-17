@@ -12,8 +12,15 @@ PUBLISH_PENDING=0
 
 _publish_tmux() { tmux "$@"; }
 
+publish_escape() {
+  local hash="#"
+  printf '%s' "${1//"${hash}"/${hash}${hash}}"
+}
+
 publish_chars() {
-  printf '%s' "${1}" | LC_ALL=C tr -d '\200-\277' | wc -c | tr -d ' '
+  local LC_ALL=C
+  local value="${1//[$'\200'-$'\277']/}"
+  printf '%s' "${#value}"
 }
 
 publish_pad() {
@@ -69,9 +76,4 @@ publish_commit() {
   PUBLISH_BATCH=()
   PUBLISH_PENDING=0
   return "${rc}"
-}
-
-publish_escape() {
-  local hash="#"
-  printf '%s' "${1//"${hash}"/${hash}${hash}}"
 }
