@@ -209,8 +209,6 @@ teardown() {
   [[ -z "$(read_gram)" ]]
 }
 
-# Stub every external GPU/system binary so the seam bodies execute for coverage
-# without ever launching a real tool.
 _stub_external_binaries() {
   ioreg() { :; }
   nvidia-smi() { :; }
@@ -238,8 +236,6 @@ _stub_external_binaries() {
   run _read_sys_gpu_freq
   true
 }
-
-# --- extended pure parsers -------------------------------------------------
 
 @test "gpu.sh - _bytes_to_mib converts and rejects junk" {
   [[ "$(_bytes_to_mib 1048576)" == "1" ]]
@@ -344,8 +340,6 @@ GPU[0]		: VRAM Total Used Memory (B): 1073741824'
   [[ "$(top_process_from_nvidia "${t}")" == "python" ]]
   [[ -z "$(top_process_from_nvidia '')" ]]
 }
-
-# --- extended readers ------------------------------------------------------
 
 @test "gpu.sh - read_vram uses ioreg and memsize on macOS" {
   _PLATFORM_OS_CACHE="Darwin"

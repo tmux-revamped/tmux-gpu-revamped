@@ -1,11 +1,4 @@
 #!/usr/bin/env bash
-#
-# popup.sh: the detail popup and the doctor capability report.
-#
-# The popup is a bound key that opens a GPU monitor through tmux display-popup.
-# Every tmux call goes through the `_tmux` seam so tests can assert on the
-# command without ever opening a popup or launching a monitor. The doctor report
-# only inspects tool availability with `command -v`; it never executes a GPU tool.
 
 [[ -n "${_GPU_REVAMPED_POPUP_LOADED:-}" ]] && return 0
 _GPU_REVAMPED_POPUP_LOADED=1
@@ -18,12 +11,8 @@ source "${_GPU_POPUP_DIR}/../utils/platform.sh"
 # shellcheck source=/dev/null
 source "${_GPU_POPUP_DIR}/../tmux/tmux-ops.sh"
 
-# _tmux ARGS... -> the single tmux seam the popup drives. Tests override it so a
-# popup is never opened.
 _tmux() { tmux "$@"; }
 
-# _drm_present -> 0 when a /sys/class/drm card node exists. A seam so the doctor
-# report can be exercised without a real sysfs.
 _drm_present() {
   local f
   for f in /sys/class/drm/card[0-9]*; do
@@ -32,8 +21,6 @@ _drm_present() {
   return 1
 }
 
-# gpu_popup_command -> the monitor command to run inside the popup. Honors an
-# explicit override, then prefers nvtop, then a vendor smi, then btop.
 gpu_popup_command() {
   local override
   override=$(get_tmux_option "@gpu_revamped_popup_command" "")
@@ -54,7 +41,6 @@ gpu_popup_command() {
   fi
 }
 
-# gpu_popup -> open the detail popup through the tmux seam.
 gpu_popup() {
   local cmd width height
   cmd=$(gpu_popup_command)
@@ -63,7 +49,6 @@ gpu_popup() {
   _tmux display-popup -w "${width}" -h "${height}" -E "${cmd}"
 }
 
-# _doctor_tool LABEL COMMAND -> a "detected/missing" line for COMMAND.
 _doctor_tool() {
   if has_command "${2}"; then
     printf '%s: detected (%s)\n' "${1}" "${2}"
@@ -72,7 +57,6 @@ _doctor_tool() {
   fi
 }
 
-# gpu_doctor -> a capability report explaining detected sources and empties.
 gpu_doctor() {
   echo "tmux-gpu-revamped doctor"
   printf 'OS: %s (%s)\n' "$(platform_os)" "$(platform_arch)"

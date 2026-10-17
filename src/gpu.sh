@@ -1,15 +1,4 @@
 #!/usr/bin/env bash
-#
-# gpu.sh: command dispatcher for tmux-gpu-revamped.
-#
-# Usage:
-#   gpu.sh gpu_percentage | gpu_icon | gpu_fg_color | gpu_bg_color
-#   gpu.sh gpu_temp | gpu_temp_icon | gpu_temp_fg_color | gpu_temp_bg_color
-#   gpu.sh gpu_freq | gpu_graph
-#   gpu.sh gram_percentage | gram_icon | gram_fg_color | gram_bg_color | gram_used
-#   gpu.sh gpu_power | gpu_power_pct | gpu_fan
-#   gpu.sh gpu_enc | gpu_dec | gpu_throttle | gpu_pstate | gpu_top_process
-#   gpu.sh refresh | popup | doctor
 
 PLUGIN_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 
@@ -43,7 +32,6 @@ gpu_history_size() {
   get_tmux_option "@gpu_revamped_history_size" "20"
 }
 
-# gpu_history_push VALUE -> append VALUE to the bounded util history option.
 gpu_history_push() {
   local value="${1}"
   [[ "${value}" =~ ^[0-9]+$ ]] || return 0
@@ -53,7 +41,6 @@ gpu_history_push() {
     "$(history_push "${current}" "${value}" "$(gpu_history_size)")"
 }
 
-# gpu_graph -> render the load history as a sparkline.
 gpu_graph() {
   render_sparkline "$(get_tmux_option "@gpu_revamped_util_history" "")"
 }

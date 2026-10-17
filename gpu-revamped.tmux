@@ -1,10 +1,4 @@
 #!/usr/bin/env bash
-#
-# gpu-revamped.tmux: TPM entry point.
-#
-# Replaces the #{gpu_*} and #{gram_*} placeholders in status-left and
-# status-right with calls to the dispatcher, which reads cached values, and binds
-# the detail-popup key.
 
 PLUGIN_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 GPU_CMD="${PLUGIN_DIR}/src/gpu.sh"

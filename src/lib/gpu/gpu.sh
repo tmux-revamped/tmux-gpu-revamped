@@ -1,15 +1,4 @@
 #!/usr/bin/env bash
-#
-# gpu.sh: GPU load, temperature, frequency, memory, and extended-metric
-# acquisition.
-#
-# Ported from yoru-revamped-tmux with multi-vendor support: NVIDIA via
-# nvidia-smi, AMD via rocm-smi, Intel and generic Linux via /sys/class/drm,
-# Apple Silicon via ioreg, and macOS temperature via istats. Pure parsers turn
-# probe output into numbers; readers wrap the host probes behind seams tests stub.
-#
-# Every external command is reached through a `_read_*` seam so tests can stub it.
-# No GPU tool is ever executed during tests.
 
 [[ -n "${_GPU_REVAMPED_GPU_LOADED:-}" ]] && return 0
 _GPU_REVAMPED_GPU_LOADED=1
@@ -24,11 +13,6 @@ source "${_GPU_LIB_DIR}/temperature.sh"
 # shellcheck source=/dev/null
 source "${_GPU_LIB_DIR}/../utils/publish.sh"
 
-# ---------------------------------------------------------------------------
-# Pure parsers
-# ---------------------------------------------------------------------------
-
-# gpu_usage_from_ioreg TEXT -> highest "Utilization %" integer, clamped to 100.
 gpu_usage_from_ioreg() {
   local v
   v=$(printf '%s\n' "${1}" | grep -o '"[A-Za-z]* Utilization %"=[0-9]*' \
@@ -38,54 +22,45 @@ gpu_usage_from_ioreg() {
   echo "${v}"
 }
 
-# gpu_usage_from_nvidia TEXT -> integer utilization.
 gpu_usage_from_nvidia() {
   local v
   v=$(printf '%s\n' "${1}" | head -1 | tr -d ' ')
   [[ "${v}" =~ ^[0-9]+$ ]] && echo "${v}"
 }
 
-# gpu_usage_from_rocm TEXT -> integer GPU use percent.
 gpu_usage_from_rocm() {
   local v
   v=$(printf '%s\n' "${1}" | awk '/GPU use/ {gsub(/%/, ""); print $NF; exit}')
   [[ "${v}" =~ ^[0-9]+$ ]] && echo "${v}"
 }
 
-# gpu_temp_from_nvidia TEXT -> integer Celsius.
 gpu_temp_from_nvidia() {
   local v
   v=$(printf '%s\n' "${1}" | head -1 | tr -d ' ')
   [[ "${v}" =~ ^[0-9]+$ ]] && echo "${v}"
 }
 
-# gpu_temp_from_hwmon MILLIDEG -> integer Celsius.
 gpu_temp_from_hwmon() {
   [[ "${1}" =~ ^[0-9]+$ ]] || { echo ""; return 0; }
   echo $(( ${1} / 1000 ))
 }
 
-# gpu_temp_from_rocm TEXT -> integer Celsius from the edge sensor.
 gpu_temp_from_rocm() {
   printf '%s\n' "${1}" | awk '/edge/ {for(i=1;i<=NF;i++) if($i ~ /^[0-9]+\.?[0-9]*$/) {print int($i); exit}}'
 }
 
-# gpu_temp_from_istats TEXT -> integer Celsius from `istats gpu temp`.
 gpu_temp_from_istats() {
   printf '%s\n' "${1}" | awk '/GPU/ {for(i=1;i<=NF;i++) if($i ~ /[0-9]/) {gsub(/[^0-9.]/, "", $i); if($i != "") {print int($i); exit}}}'
 }
 
-# gpu_freq_from_value VALUE -> the value when it is a positive integer.
 gpu_freq_from_value() {
   [[ "${1}" =~ ^[0-9]+$ ]] && (( ${1} > 0 )) && echo "${1}"
 }
 
-# gpu_freq_from_rocm TEXT -> integer MHz from the sclk line.
 gpu_freq_from_rocm() {
   printf '%s\n' "${1}" | awk '/sclk/ && /Mhz/ {gsub(/[^0-9]/, "", $2); print $2; exit}'
 }
 
-# gpu_freq_apple BRAND_STRING -> max GPU clock MHz for an Apple Silicon chip.
 gpu_freq_apple() {
   local brand="${1}" gen variant
   gen=$(printf '%s' "${brand}" | grep -oE 'M[1-5]' | grep -oE '[1-5]' | head -1)
@@ -99,7 +74,6 @@ gpu_freq_apple() {
   esac
 }
 
-# gpu_freq_intel_mac MODEL -> base clock MHz for known Intel-Mac GPUs.
 gpu_freq_intel_mac() {
   case "${1}" in
     *"Radeon Pro W6800X"*) echo 2045 ;;
@@ -120,7 +94,6 @@ gpu_freq_intel_mac() {
   esac
 }
 
-# gram_from_smi LINE -> integer percent from "used, total" memory CSV.
 gram_from_smi() {
   local -a f
   read -ra f <<< "${1//,/ }"
@@ -129,27 +102,23 @@ gram_from_smi() {
   LC_ALL=C awk -v u="${used}" -v t="${total}" 'BEGIN { printf "%.0f", (u / t) * 100 }'
 }
 
-# _bytes_to_mib BYTES -> integer mebibytes, empty for non-numeric input.
 _bytes_to_mib() {
   [[ "${1}" =~ ^[0-9]+$ ]] || { echo ""; return 0; }
   echo $(( ${1} / 1048576 ))
 }
 
-# vram_used PAIR -> first field ("USED TOTAL" in MiB), empty when blank.
 vram_used() {
   local -a f
   read -ra f <<< "${1}"
   echo "${f[0]:-}"
 }
 
-# vram_total PAIR -> second field of "USED TOTAL".
 vram_total() {
   local -a f
   read -ra f <<< "${1}"
   echo "${f[1]:-}"
 }
 
-# gram_pct_from_pair PAIR -> integer percent from "USED TOTAL" (space separated).
 gram_pct_from_pair() {
   local -a f
   read -ra f <<< "${1}"
@@ -158,7 +127,6 @@ gram_pct_from_pair() {
   LC_ALL=C awk -v u="${used}" -v t="${total}" 'BEGIN { printf "%.0f", (u / t) * 100 }'
 }
 
-# vram_from_nvidia LINE -> "USED TOTAL" MiB from "used, total" CSV.
 vram_from_nvidia() {
   local -a f
   read -ra f <<< "${1//,/ }"
@@ -167,7 +135,6 @@ vram_from_nvidia() {
   echo "${used} ${total}"
 }
 
-# vram_from_sys USED_BYTES TOTAL_BYTES -> "USED TOTAL" MiB, empty when invalid.
 vram_from_sys() {
   local used total
   used=$(_bytes_to_mib "${1}")
@@ -176,7 +143,6 @@ vram_from_sys() {
   echo "${used} ${total}"
 }
 
-# vram_from_rocm TEXT -> "USED TOTAL" MiB from `rocm-smi --showmeminfo vram`.
 vram_from_rocm() {
   local used total
   total=$(printf '%s\n' "${1}" | awk '/VRAM Total Memory/ {gsub(/[^0-9]/, "", $NF); print $NF; exit}')
@@ -187,7 +153,6 @@ vram_from_rocm() {
   echo "${used} ${total}"
 }
 
-# vram_used_from_ioreg TEXT -> in-use GPU memory in MiB from an IOAccelerator dump.
 vram_used_from_ioreg() {
   local bytes
   bytes=$(printf '%s\n' "${1}" | grep -o '"In use system memory"=[0-9]*' \
@@ -195,7 +160,6 @@ vram_used_from_ioreg() {
   _bytes_to_mib "${bytes}"
 }
 
-# power_from_nvidia LINE -> integer watts from "draw, limit".
 power_from_nvidia() {
   local -a f
   read -ra f <<< "${1//,/ }"
@@ -204,7 +168,6 @@ power_from_nvidia() {
   LC_ALL=C awk -v d="${draw}" 'BEGIN { printf "%.0f", d }'
 }
 
-# power_pct_from_nvidia LINE -> draw as integer percent of limit.
 power_pct_from_nvidia() {
   local -a f
   read -ra f <<< "${1//,/ }"
@@ -213,7 +176,6 @@ power_pct_from_nvidia() {
   LC_ALL=C awk -v d="${draw}" -v l="${limit}" 'BEGIN { if (l <= 0) exit 0; printf "%.0f", (d / l) * 100 }'
 }
 
-# power_from_rocm TEXT -> integer watts from the rocm power line.
 power_from_rocm() {
   local w
   w=$(printf '%s\n' "${1}" | awk '/Average Graphics Package Power/ {gsub(/[^0-9.]/, "", $NF); print $NF; exit}')
@@ -221,33 +183,28 @@ power_from_rocm() {
   LC_ALL=C awk -v w="${w}" 'BEGIN { printf "%.0f", w }'
 }
 
-# fan_from_nvidia VALUE -> integer fan percent.
 fan_from_nvidia() {
   local v
   v=$(printf '%s\n' "${1}" | head -1 | tr -d ' ')
   [[ "${v}" =~ ^[0-9]+$ ]] && echo "${v}"
 }
 
-# fan_from_rocm TEXT -> integer fan percent from "Fan speed (%): N".
 fan_from_rocm() {
   printf '%s\n' "${1}" | awk -F: '/Fan speed/ {gsub(/[^0-9]/, "", $NF); if ($NF != "") {print $NF; exit}}'
 }
 
-# enc_from_nvidia LINE -> encoder utilization (first field of "enc, dec").
 enc_from_nvidia() {
   local -a f
   read -ra f <<< "${1//,/ }"
   [[ "${f[0]:-}" =~ ^[0-9]+$ ]] && echo "${f[0]}"
 }
 
-# dec_from_nvidia LINE -> decoder utilization (second field of "enc, dec").
 dec_from_nvidia() {
   local -a f
   read -ra f <<< "${1//,/ }"
   [[ "${f[1]:-}" =~ ^[0-9]+$ ]] && echo "${f[1]}"
 }
 
-# throttle_from_nvidia HEX -> a single throttle-reason word, empty when none.
 throttle_from_nvidia() {
   local hex="${1}" reasons
   hex=$(printf '%s' "${hex}" | tr -d ' ' | sed 's/^0[xX]//')
@@ -267,22 +224,16 @@ throttle_from_nvidia() {
   fi
 }
 
-# pstate_from_nvidia VALUE -> the performance state when shaped like "P0".
 pstate_from_nvidia() {
   local v
   v=$(printf '%s\n' "${1}" | head -1 | tr -d ' ')
   [[ "${v}" =~ ^P[0-9]+$ ]] && echo "${v}"
 }
 
-# top_process_from_nvidia TEXT -> name of the compute app using the most memory.
 top_process_from_nvidia() {
   printf '%s\n' "${1}" \
     | awk -F, 'NF >= 2 {n=$1+0; name=$2; sub(/^[ \t]+/, "", name); if (n >= max) {max=n; top=name}} END {if (top != "") print top}'
 }
-
-# ---------------------------------------------------------------------------
-# Host-probe seams (tests override these)
-# ---------------------------------------------------------------------------
 
 _read_ioreg_gpu() { ioreg -r -d 1 -w 0 -c IOAccelerator 2>/dev/null; }
 _read_nvidia_usage() { nvidia-smi --query-gpu=utilization.gpu --format=csv,noheader,nounits 2>/dev/null; }
@@ -308,8 +259,6 @@ _read_nvidia_procs() { nvidia-smi --query-compute-apps=used_memory,process_name 
 _read_brand_string() { sysctl -n machdep.cpu.brand_string 2>/dev/null; }
 _read_sp_displays() { system_profiler SPDisplaysDataType 2>/dev/null | awk -F: '/Chipset Model/ {gsub(/^[ \t]+/, "", $2); print $2; exit}'; }
 
-# _read_sys_first GLOB DIVISOR -> first readable numeric value under GLOB,
-# divided by DIVISOR (1 for none). Used for /sys/class/drm probes.
 _read_sys_first() {
   local glob="${1}" div="${2:-1}" f v
   for f in ${glob}; do
@@ -327,10 +276,6 @@ _read_sys_gpu_temp() { _read_sys_first "/sys/class/drm/card[0-9]*/device/hwmon/h
 _read_sys_gpu_freq() { _read_sys_first "/sys/class/drm/card[0-9]*/gt_cur_freq_mhz" 1; }
 _read_sys_vram_used() { _read_sys_first "/sys/class/drm/card[0-9]*/device/mem_info_vram_used" 1; }
 _read_sys_vram_total() { _read_sys_first "/sys/class/drm/card[0-9]*/device/mem_info_vram_total" 1; }
-
-# ---------------------------------------------------------------------------
-# Readers (the worker calls these)
-# ---------------------------------------------------------------------------
 
 read_gpu_usage() {
   if is_macos; then
@@ -388,7 +333,6 @@ read_gpu_freq() {
   fi
 }
 
-# read_vram -> "USED TOTAL" in MiB across NVIDIA, AMD, Intel/sysfs, and Apple.
 read_vram() {
   if is_macos; then
     local used total
@@ -408,7 +352,6 @@ read_vram() {
   fi
 }
 
-# read_gram -> integer VRAM-used percent across every supported vendor.
 read_gram() {
   gram_pct_from_pair "$(read_vram)"
 }
