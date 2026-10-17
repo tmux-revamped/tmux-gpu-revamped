@@ -84,10 +84,11 @@ gpu_doctor() {
     echo "Linux sysfs (/sys/class/drm): absent"
   fi
   _doctor_tool "Apple ioreg" ioreg
+  _doctor_tool "Apple Silicon temperature" macmon
   _doctor_tool "macOS temperature" istats
   _doctor_tool "popup monitor" nvtop
-  if is_macos && is_apple_silicon; then
-    echo "note: Apple Silicon GPU temperature needs sudo, so #{gpu_temp} is empty"
+  if is_macos && is_apple_silicon && ! has_command macmon; then
+    echo "note: Apple Silicon GPU temperature needs macmon, so #{gpu_temp} is empty"
   fi
   echo "note: power/fan come from NVIDIA and AMD; encoder, decoder, throttle,"
   echo "      performance state, and top process are NVIDIA-only and render empty elsewhere"

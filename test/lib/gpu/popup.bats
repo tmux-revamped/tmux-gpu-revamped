@@ -80,14 +80,36 @@ teardown() {
   [[ "${output}" == *"NVIDIA-only"* ]]
 }
 
-@test "popup.sh - gpu_doctor notes Apple Silicon temperature" {
+@test "popup.sh - gpu_doctor asks for macmon on Apple Silicon without it" {
+  # Arrange
   _PLATFORM_OS_CACHE="Darwin"
   _PLATFORM_ARCH_CACHE="arm64"
   has_command() { return 1; }
   _drm_present() { return 1; }
+
+  # Act
   run gpu_doctor
-  [[ "${output}" == *"absent"* ]]
-  [[ "${output}" == *"Apple Silicon GPU temperature needs sudo"* ]]
+
+  # Assert
+  [[ "${output}" == *"absent"* ]] || false
+  [[ "${output}" == *"Apple Silicon temperature: missing (macmon)"* ]] || false
+  [[ "${output}" == *"note: Apple Silicon GPU temperature needs macmon, so #{gpu_temp} is empty"* ]]
+}
+
+@test "popup.sh - gpu_doctor reports macmon on Apple Silicon without a sudo note" {
+  # Arrange
+  _PLATFORM_OS_CACHE="Darwin"
+  _PLATFORM_ARCH_CACHE="arm64"
+  has_command() { [[ "${1}" == "macmon" ]]; }
+  _drm_present() { return 1; }
+
+  # Act
+  run gpu_doctor
+
+  # Assert
+  [[ "${output}" == *"Apple Silicon temperature: detected (macmon)"* ]] || false
+  [[ "${output}" != *"sudo"* ]] || false
+  [[ "${output}" != *"needs macmon"* ]]
 }
 
 @test "popup.sh - _drm_present is callable" {

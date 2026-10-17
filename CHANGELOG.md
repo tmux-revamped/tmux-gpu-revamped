@@ -56,6 +56,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - The README said Apple Silicon GPU temperature needs root and that GPU memory
   is NVIDIA only. Temperature comes from `macmon` without root, and memory
   also reads AMD sysfs, `rocm-smi` and macOS `ioreg`; the README now says so.
+- The `doctor` report told every Apple Silicon user that GPU temperature needs
+  sudo, even with `macmon` installed and supplying it. It now reports whether
+  `macmon` is present and asks for it only when it is missing.
 
 ## [1.2.0] - 2026-06-29
 
