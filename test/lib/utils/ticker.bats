@@ -142,6 +142,23 @@ wait_for_file() {
   [[ "$(cat "${TEST_TMPDIR}/spawned")" == "daemon" ]]
 }
 
+@test "ticker - spawn detaches the daemon from the caller's stdin" {
+  # Arrange
+  local script="${TEST_TMPDIR}/reader.sh"
+  printf '#!/usr/bin/env bash\ncat > "%s/stdin"\n: > "%s/read"\n' "${TEST_TMPDIR}" "${TEST_TMPDIR}" > "${script}"
+  chmod +x "${script}"
+
+  # Act
+  (
+    set -m
+    _ticker_spawn "${script}"
+  ) <<<"leaked"
+
+  # Assert
+  wait_for_file "${TEST_TMPDIR}/read"
+  [[ "$(cat "${TEST_TMPDIR}/stdin")" == "" ]]
+}
+
 @test "ticker - the sleep seam is callable" {
   unset _TMUX_PLUGIN_TICKER_LOADED
   source "${TICKER_LIB}"

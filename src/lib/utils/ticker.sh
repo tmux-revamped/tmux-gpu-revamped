@@ -16,7 +16,7 @@ TICKER_OPT_COUNT=0
 _ticker_tmux() { tmux "$@"; }
 _ticker_sleep() { sleep "${1}"; }
 _ticker_spawn() {
-  nohup "${1}" daemon >/dev/null 2>&1 &
+  nohup "${1}" daemon </dev/null >/dev/null 2>&1 &
   disown 2>/dev/null || true
 }
 
