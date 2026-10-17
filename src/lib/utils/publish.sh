@@ -70,3 +70,8 @@ publish_commit() {
   PUBLISH_PENDING=0
   return "${rc}"
 }
+
+publish_escape() {
+  local hash="#"
+  printf '%s' "${1//"${hash}"/${hash}${hash}}"
+}

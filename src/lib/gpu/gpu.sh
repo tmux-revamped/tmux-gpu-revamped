@@ -21,6 +21,8 @@ source "${_GPU_LIB_DIR}/../utils/has-command.sh"
 source "${_GPU_LIB_DIR}/../utils/platform.sh"
 # shellcheck source=/dev/null
 source "${_GPU_LIB_DIR}/temperature.sh"
+# shellcheck source=/dev/null
+source "${_GPU_LIB_DIR}/../utils/publish.sh"
 
 # ---------------------------------------------------------------------------
 # Pure parsers
@@ -465,7 +467,7 @@ read_gpu_pstate() {
 
 read_gpu_top_process() {
   if is_linux && has_command nvidia-smi; then
-    top_process_from_nvidia "$(_read_nvidia_procs)"
+    publish_escape "$(top_process_from_nvidia "$(_read_nvidia_procs)")"
   fi
 }
 

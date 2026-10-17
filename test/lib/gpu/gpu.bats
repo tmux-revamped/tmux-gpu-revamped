@@ -484,6 +484,19 @@ GPU[0]		: VRAM Total Used Memory (B): 1073741824'
   [[ "$(read_gpu_top_process)" == "python" ]]
 }
 
+@test "gpu.sh - read_gpu_top_process doubles a hash in the process name" {
+  # Arrange
+  _PLATFORM_OS_CACHE="Linux"
+  has_command() { [[ "${1}" == "nvidia-smi" ]]; }
+  _read_nvidia_procs() { printf '%s\n' '900, /opt/evil#(touch pwned)'; }
+
+  # Act
+  run read_gpu_top_process
+
+  # Assert
+  [[ "${output}" == "/opt/evil##(touch pwned)" ]]
+}
+
 @test "gpu.sh - read_gpu_top_process is empty on macOS" {
   _PLATFORM_OS_CACHE="Darwin"
   [[ -z "$(read_gpu_top_process)" ]]

@@ -177,3 +177,14 @@ logged_words() {
 
   [[ "$(logged_words)" == "set-option|-gq|@a|100%" ]]
 }
+
+@test "publish - escape doubles every hash so tmux renders it literally" {
+  # Arrange
+  local raw="#(rm -rf ~) #[fg=red]##"
+
+  # Act
+  run publish_escape "${raw}"
+
+  # Assert
+  [[ "${output}" == "##(rm -rf ~) ##[fg=red]####" ]]
+}
