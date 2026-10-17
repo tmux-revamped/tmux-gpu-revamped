@@ -4,7 +4,7 @@
 #
 # Replaces the #{gpu_*} and #{gram_*} placeholders in status-left and
 # status-right with calls to the dispatcher, which reads cached values, and binds
-# the detail-popup key when the user opts in.
+# the detail-popup key.
 
 PLUGIN_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 GPU_CMD="${PLUGIN_DIR}/src/gpu.sh"
@@ -114,7 +114,8 @@ update_option() {
 bind_popup_key() {
   local key
   key=$(tmux show-option -gqv "@gpu_revamped_popup_key")
-  [[ -z "${key}" ]] && return 0
+  [[ -z "${key}" ]] && key="M-g"
+  [[ "${key}" == "off" ]] && return 0
   tmux bind-key "${key}" run-shell "${GPU_CMD_QUOTED} popup"
 }
 

@@ -4,7 +4,7 @@
 
 **GPU load, temperature, frequency, and memory for your tmux status bar.**
 
-[![Tests](https://github.com/tmux-revamped/tmux-gpu-revamped/actions/workflows/tests.yml/badge.svg)](https://github.com/tmux-revamped/tmux-gpu-revamped/actions/workflows/tests.yml) [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE) [![Version](https://img.shields.io/badge/version-1.2.0-blue.svg)](CHANGELOG.md)
+[![Tests](https://github.com/tmux-revamped/tmux-gpu-revamped/actions/workflows/tests.yml/badge.svg)](https://github.com/tmux-revamped/tmux-gpu-revamped/actions/workflows/tests.yml) [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE) [![Version](https://img.shields.io/badge/version-2.0.0-blue.svg)](CHANGELOG.md)
 
 </div>
 
@@ -98,7 +98,7 @@ Press `prefix + I` to install.
 | `@gpu_revamped_top_process_format` | `%s` | format for the top compute app |
 | `@gpu_revamped_history_size` | `20` | samples kept for `#{gpu_graph}` |
 | `@gpu_revamped_detail_interval` | `60` | seconds the temperature, clock, power, fan, encoder, decoder, throttle, performance state and top process readings stay cached between refreshes |
-| `@gpu_revamped_popup_key` | empty | prefix key that opens the GPU detail popup |
+| `@gpu_revamped_popup_key` | `M-g` | prefix key that opens the GPU detail popup; set `off` to bind nothing |
 | `@gpu_revamped_popup_command` | auto | command run in the popup (nvtop, vendor smi, or btop, then `top` when none is installed) |
 | `@gpu_revamped_popup_width` / `@gpu_revamped_popup_height` | `80%` | popup size |
 

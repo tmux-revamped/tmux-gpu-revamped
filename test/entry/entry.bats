@@ -103,3 +103,39 @@ teardown() {
   [[ "$(cat "$(_mock_opt_file status-right)")" == "[#($(cd "${TEST_TMPDIR}" && pwd)/it\\'s\\ a\\&b\\ dir/src/gpu.sh gpu_percentage)]" ]] || false
   [[ "$(cat "${BIND_LOG}")" == "bind-key M-g run-shell $(cd "${TEST_TMPDIR}" && pwd)/it\\'s\\ a\\&b\\ dir/src/gpu.sh popup" ]]
 }
+
+record_bind_keys() {
+  export BIND_LOG="${TEST_TMPDIR}/bind.log"
+  eval "_base_tmux() $(declare -f tmux | tail -n +2)"
+  tmux() {
+    if [[ "${1}" == "bind-key" ]]; then
+      printf '%s\n' "$*" >> "${BIND_LOG}"
+      return 0
+    fi
+    _base_tmux "$@"
+  }
+  export -f _base_tmux tmux
+}
+
+@test "entry - the popup key defaults to M-g" {
+  # Arrange
+  record_bind_keys
+
+  # Act
+  bash "${ENTRY}"
+
+  # Assert
+  [[ "$(cat "${BIND_LOG}")" == "bind-key M-g run-shell "*"/src/gpu.sh popup" ]]
+}
+
+@test "entry - a popup key of off binds nothing" {
+  # Arrange
+  record_bind_keys
+  tmux set-option -gq "@gpu_revamped_popup_key" "off"
+
+  # Act
+  bash "${ENTRY}"
+
+  # Assert
+  [ ! -e "${BIND_LOG}" ]
+}

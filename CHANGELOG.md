@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [2.0.0] - 2026-10-17
+
 ### Added
 
 - GPU temperature on macOS: `macmon` on Apple Silicon, read without sudo,
@@ -24,6 +26,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+- **Breaking:** the detail popup is now bound to `prefix + M-g` by default, the
+  key the family allocation gives this plugin, where it used to stay unbound
+  until `@gpu_revamped_popup_key` was set. Set the option to `off` to keep it
+  unbound.
 - The options-mode background process reads every option it needs in one tmux
   call per tick, sends its cache writes and published values in a second, and
   keeps its functions out of the environment of the commands it runs.
