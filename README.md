@@ -51,8 +51,9 @@ Built from [tmux-plugin-template](https://github.com/tmux-revamped/tmux-plugin-t
 
 Power and fan come from NVIDIA and AMD. Encoder, decoder, throttle reason,
 performance state, and top process are NVIDIA-only and render empty on other
-vendors. Apple Silicon GPU temperature needs root, so `#{gpu_temp}` is empty
-there. Run `src/gpu.sh doctor` to see which probes were detected on the host.
+vendors. Apple Silicon GPU temperature comes from `macmon`, which needs no root;
+without it `#{gpu_temp}` is empty there. Run `src/gpu.sh doctor` to see which
+probes were detected on the host.
 
 ## Install
 
@@ -209,10 +210,10 @@ set -g @gpu_revamped_gram_high_fg_color '#[fg=#dc322f]'
 | Setup | Load | Temperature | Frequency | Memory |
 |-------|------|-------------|-----------|--------|
 | Linux + NVIDIA (`nvidia-smi`) | yes | yes | yes | yes |
-| Linux + AMD (`rocm-smi`) | yes | yes | yes | no |
-| Linux + Intel or generic (`/sys/class/drm`) | yes | yes | yes | no |
-| macOS Apple Silicon | yes, `ioreg` | yes, `macmon` | yes, chip table | no |
-| macOS Intel | yes, `ioreg` | yes, `osx-cpu-temp -g` | yes, model table | no |
+| Linux + AMD (`rocm-smi`) | yes | yes | yes | yes, `rocm-smi` or `mem_info_vram_*` |
+| Linux + Intel or generic (`/sys/class/drm`) | yes | yes | yes | only when the driver exposes `mem_info_vram_*` |
+| macOS Apple Silicon | yes, `ioreg` | yes, `macmon` | yes, chip table | yes, `ioreg` in-use memory over total RAM |
+| macOS Intel | yes, `ioreg` | yes, `osx-cpu-temp -g` | yes, model table | when `ioreg` reports in-use memory |
 
 Verified on an Apple M3 Max: load reads through `ioreg` and frequency comes from a per-chip clock table, so the GPU placeholders are populated even though there is no `nvidia-smi`.
 
@@ -224,7 +225,7 @@ GPU temperature on macOS needs one optional helper:
 | macOS Intel | `brew install osx-cpu-temp` | `osx-cpu-temp -g`, the GPU SMC key; `gem install iStats` also works |
 | Linux | none | `nvidia-smi`, `/sys/class/drm` hwmon, or `rocm-smi` |
 
-Temperatures are whole degrees. GPU memory (`gram`) is NVIDIA only. Any metric with no source on the host renders empty and never errors.
+Temperatures are whole degrees. GPU memory (`gram`) reads `nvidia-smi`, the amdgpu `mem_info_vram_*` sysfs files, `rocm-smi`, or on macOS the `In use system memory` that `ioreg` reports against total RAM. Any metric with no source on the host renders empty and never errors.
 
 ## Development
 

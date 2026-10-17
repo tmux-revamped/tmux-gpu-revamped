@@ -53,6 +53,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   unquoted. The path is now shell-quoted, with any `#` doubled for tmux.
 - The README documented `@gpu_revamped_enable_logging`, but no code path ever
   wrote a log, so setting it did nothing. The option is no longer documented.
+- The README said Apple Silicon GPU temperature needs root and that GPU memory
+  is NVIDIA only. Temperature comes from `macmon` without root, and memory
+  also reads AMD sysfs, `rocm-smi` and macOS `ioreg`; the README now says so.
 
 ## [1.2.0] - 2026-06-29
 
