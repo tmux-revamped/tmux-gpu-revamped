@@ -8,6 +8,9 @@
 
 PLUGIN_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 GPU_CMD="${PLUGIN_DIR}/src/gpu.sh"
+HASH="#"
+GPU_CMD_QUOTED="$(printf '%q' "${GPU_CMD}")"
+GPU_CMD_QUOTED="${GPU_CMD_QUOTED//"${HASH}"/${HASH}${HASH}}"
 
 placeholders=(
   "\#{gpu_percentage}"
@@ -36,29 +39,29 @@ placeholders=(
 )
 
 commands=(
-  "#(${GPU_CMD} gpu_percentage)"
-  "#(${GPU_CMD} gpu_icon)"
-  "#(${GPU_CMD} gpu_fg_color)"
-  "#(${GPU_CMD} gpu_bg_color)"
-  "#(${GPU_CMD} gpu_graph)"
-  "#(${GPU_CMD} gpu_temp)"
-  "#(${GPU_CMD} gpu_temp_icon)"
-  "#(${GPU_CMD} gpu_temp_fg_color)"
-  "#(${GPU_CMD} gpu_temp_bg_color)"
-  "#(${GPU_CMD} gpu_freq)"
-  "#(${GPU_CMD} gpu_power)"
-  "#(${GPU_CMD} gpu_power_pct)"
-  "#(${GPU_CMD} gpu_fan)"
-  "#(${GPU_CMD} gpu_enc)"
-  "#(${GPU_CMD} gpu_dec)"
-  "#(${GPU_CMD} gpu_throttle)"
-  "#(${GPU_CMD} gpu_pstate)"
-  "#(${GPU_CMD} gpu_top_process)"
-  "#(${GPU_CMD} gram_percentage)"
-  "#(${GPU_CMD} gram_icon)"
-  "#(${GPU_CMD} gram_fg_color)"
-  "#(${GPU_CMD} gram_bg_color)"
-  "#(${GPU_CMD} gram_used)"
+  "#(${GPU_CMD_QUOTED} gpu_percentage)"
+  "#(${GPU_CMD_QUOTED} gpu_icon)"
+  "#(${GPU_CMD_QUOTED} gpu_fg_color)"
+  "#(${GPU_CMD_QUOTED} gpu_bg_color)"
+  "#(${GPU_CMD_QUOTED} gpu_graph)"
+  "#(${GPU_CMD_QUOTED} gpu_temp)"
+  "#(${GPU_CMD_QUOTED} gpu_temp_icon)"
+  "#(${GPU_CMD_QUOTED} gpu_temp_fg_color)"
+  "#(${GPU_CMD_QUOTED} gpu_temp_bg_color)"
+  "#(${GPU_CMD_QUOTED} gpu_freq)"
+  "#(${GPU_CMD_QUOTED} gpu_power)"
+  "#(${GPU_CMD_QUOTED} gpu_power_pct)"
+  "#(${GPU_CMD_QUOTED} gpu_fan)"
+  "#(${GPU_CMD_QUOTED} gpu_enc)"
+  "#(${GPU_CMD_QUOTED} gpu_dec)"
+  "#(${GPU_CMD_QUOTED} gpu_throttle)"
+  "#(${GPU_CMD_QUOTED} gpu_pstate)"
+  "#(${GPU_CMD_QUOTED} gpu_top_process)"
+  "#(${GPU_CMD_QUOTED} gram_percentage)"
+  "#(${GPU_CMD_QUOTED} gram_icon)"
+  "#(${GPU_CMD_QUOTED} gram_fg_color)"
+  "#(${GPU_CMD_QUOTED} gram_bg_color)"
+  "#(${GPU_CMD_QUOTED} gram_used)"
 )
 
 render_mode="$(tmux show-option -gqv "@gpu_revamped_render")"
@@ -75,10 +78,16 @@ target_for() {
 }
 
 interpolate() {
-  local value="${1}"
-  local i
+  local value="${1}" i placeholder out rest
   for (( i = 0; i < ${#placeholders[@]}; i++ )); do
-    value="${value//${placeholders[i]}/$(target_for "${commands[i]}")}"
+    placeholder="${placeholders[i]#\\}"
+    out=""
+    rest="${value}"
+    while [[ "${rest}" == *"${placeholder}"* ]]; do
+      out="${out}${rest%%"${placeholder}"*}$(target_for "${commands[i]}")"
+      rest="${rest#*"${placeholder}"}"
+    done
+    value="${out}${rest}"
   done
   echo "${value}"
 }
@@ -106,7 +115,7 @@ bind_popup_key() {
   local key
   key=$(tmux show-option -gqv "@gpu_revamped_popup_key")
   [[ -z "${key}" ]] && return 0
-  tmux bind-key "${key}" run-shell "${GPU_CMD} popup"
+  tmux bind-key "${key}" run-shell "${GPU_CMD_QUOTED} popup"
 }
 
 chmod +x "${GPU_CMD}" 2>/dev/null || true

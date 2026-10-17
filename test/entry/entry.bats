@@ -77,3 +77,29 @@ teardown() {
   # Assert
   [ ! -f "$(_mock_opt_file @gpu_revamped_ticker_pid)" ]
 }
+
+@test "entry - the popup key quotes a plugin path with a space and a quote" {
+  # Arrange
+  local dir="${TEST_TMPDIR}/it's dir"
+  mkdir -p "${dir}"
+  cp -f "${ENTRY}" "${dir}/gpu-revamped.tmux"
+  export BIND_LOG="${TEST_TMPDIR}/bind.log"
+  eval "_base_tmux() $(declare -f tmux | tail -n +2)"
+  tmux() {
+    if [[ "${1}" == "bind-key" ]]; then
+      printf '%s\n' "$*" >> "${BIND_LOG}"
+      return 0
+    fi
+    _base_tmux "$@"
+  }
+  export -f _base_tmux tmux
+  tmux set-option -gq "@gpu_revamped_popup_key" "M-g"
+  tmux set-option -gq "status-right" "[#{gpu_percentage}]"
+
+  # Act
+  bash "${dir}/gpu-revamped.tmux"
+
+  # Assert
+  [[ "$(cat "$(_mock_opt_file status-right)")" == "[#($(cd "${TEST_TMPDIR}" && pwd)/it\\'s\\ dir/src/gpu.sh gpu_percentage)]" ]] || false
+  [[ "$(cat "${BIND_LOG}")" == "bind-key M-g run-shell $(cd "${TEST_TMPDIR}" && pwd)/it\\'s\\ dir/src/gpu.sh popup" ]]
+}

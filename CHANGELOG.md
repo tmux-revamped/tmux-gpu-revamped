@@ -48,6 +48,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   left the background ticker running forever, still publishing options nothing
   read. The entry point now releases the ticker in jobs mode, and the running
   ticker exits on its next tick.
+- A plugin directory whose path held a space or a `'` broke every `#()` status
+  call and the popup key, because the path went into the shell command
+  unquoted. The path is now shell-quoted, with any `#` doubled for tmux.
 
 ## [1.2.0] - 2026-06-29
 
