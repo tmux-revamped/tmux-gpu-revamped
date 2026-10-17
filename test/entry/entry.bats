@@ -80,7 +80,7 @@ teardown() {
 
 @test "entry - the popup key quotes a plugin path with a space and a quote" {
   # Arrange
-  local dir="${TEST_TMPDIR}/it's dir"
+  local dir="${TEST_TMPDIR}/it's a&b dir"
   mkdir -p "${dir}"
   cp -f "${ENTRY}" "${dir}/gpu-revamped.tmux"
   export BIND_LOG="${TEST_TMPDIR}/bind.log"
@@ -100,6 +100,6 @@ teardown() {
   bash "${dir}/gpu-revamped.tmux"
 
   # Assert
-  [[ "$(cat "$(_mock_opt_file status-right)")" == "[#($(cd "${TEST_TMPDIR}" && pwd)/it\\'s\\ dir/src/gpu.sh gpu_percentage)]" ]] || false
-  [[ "$(cat "${BIND_LOG}")" == "bind-key M-g run-shell $(cd "${TEST_TMPDIR}" && pwd)/it\\'s\\ dir/src/gpu.sh popup" ]]
+  [[ "$(cat "$(_mock_opt_file status-right)")" == "[#($(cd "${TEST_TMPDIR}" && pwd)/it\\'s\\ a\\&b\\ dir/src/gpu.sh gpu_percentage)]" ]] || false
+  [[ "$(cat "${BIND_LOG}")" == "bind-key M-g run-shell $(cd "${TEST_TMPDIR}" && pwd)/it\\'s\\ a\\&b\\ dir/src/gpu.sh popup" ]]
 }
