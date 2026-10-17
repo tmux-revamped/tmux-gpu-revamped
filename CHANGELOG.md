@@ -44,6 +44,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - A GPU process name containing `#` reached the status line unescaped, so a
   process named like a tmux format could inject one, including a `#()`
   command. The top process name now has every `#` doubled before it is cached.
+- Switching `@gpu_revamped_render` from `options` back to jobs and reloading
+  left the background ticker running forever, still publishing options nothing
+  read. The entry point now releases the ticker in jobs mode, and the running
+  ticker exits on its next tick.
 
 ## [1.2.0] - 2026-06-29
 
