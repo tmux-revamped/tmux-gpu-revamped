@@ -51,6 +51,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - A plugin directory whose path held a space or a `'` broke every `#()` status
   call and the popup key, because the path went into the shell command
   unquoted. The path is now shell-quoted, with any `#` doubled for tmux.
+- The README documented `@gpu_revamped_enable_logging`, but no code path ever
+  wrote a log, so setting it did nothing. The option is no longer documented.
 
 ## [1.2.0] - 2026-06-29
 

@@ -99,7 +99,6 @@ Press `prefix + I` to install.
 | `@gpu_revamped_popup_key` | empty | prefix key that opens the GPU detail popup |
 | `@gpu_revamped_popup_command` | auto | command run in the popup (nvtop, vendor smi, or btop) |
 | `@gpu_revamped_popup_width` / `@gpu_revamped_popup_height` | `80%` | popup size |
-| `@gpu_revamped_enable_logging` | `0` | set to `1` to log under `~/.tmux/gpu-revamped-logs` |
 
 ## Labels
 
