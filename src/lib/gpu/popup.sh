@@ -50,7 +50,7 @@ gpu_popup_command() {
   elif has_command btop; then
     echo "btop"
   else
-    echo "less"
+    echo "top"
   fi
 }
 

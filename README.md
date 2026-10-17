@@ -98,7 +98,7 @@ Press `prefix + I` to install.
 | `@gpu_revamped_top_process_format` | `%s` | format for the top compute app |
 | `@gpu_revamped_history_size` | `20` | samples kept for `#{gpu_graph}` |
 | `@gpu_revamped_popup_key` | empty | prefix key that opens the GPU detail popup |
-| `@gpu_revamped_popup_command` | auto | command run in the popup (nvtop, vendor smi, or btop) |
+| `@gpu_revamped_popup_command` | auto | command run in the popup (nvtop, vendor smi, or btop, then `top` when none is installed) |
 | `@gpu_revamped_popup_width` / `@gpu_revamped_popup_height` | `80%` | popup size |
 
 ## Labels

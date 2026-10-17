@@ -38,9 +38,15 @@ teardown() {
   [[ "$(gpu_popup_command)" == "btop" ]]
 }
 
-@test "popup.sh - gpu_popup_command falls back to less" {
+@test "popup.sh - gpu_popup_command falls back to top when no monitor is installed" {
+  # Arrange
   has_command() { return 1; }
-  [[ "$(gpu_popup_command)" == "less" ]]
+
+  # Act
+  run gpu_popup_command
+
+  # Assert
+  [[ "${output}" == "top" ]]
 }
 
 @test "popup.sh - gpu_popup drives the tmux seam without launching" {

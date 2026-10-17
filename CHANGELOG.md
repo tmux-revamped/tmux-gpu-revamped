@@ -61,6 +61,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   `macmon` is present and asks for it only when it is missing.
 - The render mode section named the option `@gpu_revamped_out_percentage`,
   which nothing writes. The option is `@gpu_revamped_out_gpu_percentage`.
+- With no GPU monitor installed, the popup ran `less` with no input, which
+  exits at once with an error, so the popup flashed and closed. It now falls
+  back to `top`.
 
 ## [1.2.0] - 2026-06-29
 
