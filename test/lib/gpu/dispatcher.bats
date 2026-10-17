@@ -401,3 +401,27 @@ teardown() {
 
   [[ "$(cache_get temp)" == "fresh" ]]
 }
+
+@test "gpu.sh dispatcher - gpu_refresh reads ioreg once on macOS" {
+  # Arrange
+  unset _GPU_REVAMPED_GPU_LOADED
+  source "${BATS_TEST_DIRNAME}/../../../src/lib/gpu/gpu.sh"
+  _PLATFORM_OS_CACHE="Darwin"
+  _PLATFORM_ARCH_CACHE="arm64"
+  export IOREG_LOG="${TEST_TMPDIR}/ioreg_calls"
+  _read_ioreg_gpu() {
+    printf 'call\n' >> "${IOREG_LOG}"
+    printf '%s\n' '"PerformanceStatistics" = {"Device Utilization %"=37,"In use system memory"=4294967296}'
+  }
+  _read_apple_mem_total() { echo "17179869184"; }
+  _read_brand_string() { echo "Apple M2"; }
+  has_command() { return 1; }
+
+  # Act
+  gpu_refresh
+
+  # Assert
+  [[ "$(cache_get util)" == "37" ]] || false
+  [[ "$(cache_get gram)" == "25" ]] || false
+  [[ "$(grep -c '^call$' "${IOREG_LOG}")" == "1" ]]
+}

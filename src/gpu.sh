@@ -63,9 +63,10 @@ gpu_detail_age() {
 }
 
 gpu_refresh() {
-  local vram util
-  vram="$(read_vram)"
-  util="$(read_gpu_usage)"
+  local vram util ioreg=""
+  is_macos && ioreg="$(_read_ioreg_gpu)"
+  vram="$(read_vram "${ioreg}")"
+  util="$(read_gpu_usage "${ioreg}")"
   cache_set util "${util}"
   cache_set_if_stale temp "$(gpu_detail_age)" read_gpu_temp
   cache_set_if_stale freq "$(gpu_detail_age)" read_gpu_freq

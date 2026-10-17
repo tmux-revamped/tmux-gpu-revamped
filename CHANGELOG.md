@@ -39,6 +39,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   already on the status line now counts as used.
 - A comma-decimal locale such as pt_BR printed memory as `1,5G`. The
   formatters now run under the C locale.
+- On macOS every refresh ran `ioreg` twice, once for GPU load and once for GPU
+  memory. It now runs once per refresh and both readings share the output.
 
 ## [1.2.0] - 2026-06-29
 

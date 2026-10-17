@@ -332,7 +332,7 @@ _read_sys_vram_total() { _read_sys_first "/sys/class/drm/card[0-9]*/device/mem_i
 
 read_gpu_usage() {
   if is_macos; then
-    gpu_usage_from_ioreg "$(_read_ioreg_gpu)"
+    gpu_usage_from_ioreg "${1:-$(_read_ioreg_gpu)}"
   elif is_linux; then
     if has_command nvidia-smi; then
       local v; v=$(gpu_usage_from_nvidia "$(_read_nvidia_usage)"); [[ -n "${v}" ]] && { echo "${v}"; return 0; }
@@ -390,7 +390,7 @@ read_gpu_freq() {
 read_vram() {
   if is_macos; then
     local used total
-    used=$(vram_used_from_ioreg "$(_read_ioreg_gpu)")
+    used=$(vram_used_from_ioreg "${1:-$(_read_ioreg_gpu)}")
     [[ -n "${used}" ]] || return 0
     total=$(_bytes_to_mib "$(_read_apple_mem_total)")
     [[ "${total}" =~ ^[0-9]+$ && "${total}" -gt 0 ]] || return 0
