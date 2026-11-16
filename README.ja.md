@@ -324,7 +324,7 @@ macOS では更新 1 回につき `ioreg` を 1 回だけ呼び、負荷とメ�
 | コマンド | 実行内容 |
 |:--------|:-------------|
 | `make test` | [`test/`](test) 配下の bats テスト |
-| `make lint` | すべてのシェルファイルと [`family/bin/`](family/bin) に対する warning 重大度の shellcheck |
+| `make lint` | すべてのシェルファイルに対する warning 重大度の shellcheck |
 | `make coverage` | Linux での kcov による行カバレッジ。95% 未満で失敗します |
 
 [`src/lib/gpu/gpu.sh`](src/lib/gpu/gpu.sh) のパーサーはツールの出力を引数で受け取って数値を返し、ツールの呼び出しはすべて小さな `_read_*` ラッパーに収まっています。そのため、テストは GPU なしで記録済みの出力を渡せます。
@@ -337,9 +337,9 @@ macOS では更新 1 回につき `ioreg` を 1 回だけ呼び、負荷とメ�
 
 ## tmux-revamped ファミリー
 
-このプラグインは tmux-revamped ファミリーの一員です。すべてのメンバーが [`FAMILY.md`](FAMILY.md) の同じ規約、`family/` 配下の同じツール、同じ共有ライブラリを持ち、チェックサムの一覧によってバイト単位で同一に保たれています。メンバーは一緒にインストールする前提で作られており、ほかのメンバーが使うキーや tmux オプションを使うメンバーはありません。
+このプラグインは tmux-revamped ファミリーの一員です。すべてのメンバーが [`FAMILY.md`](FAMILY.md) の同じ規約と同じ共有ライブラリを持ちます。メンバーは一緒にインストールする前提で作られており、ほかのメンバーが使うキーや tmux オプションを使うメンバーはありません。
 
-あるメンバーで見つかった不具合は、修正完了とする前に全メンバーで同じ不具合を探します。この義務は記憶に頼らず規約に書かれており、`family/bin/sweep` がその作業を行います。
+あるメンバーで見つかった不具合は、修正完了とする前に全メンバーで同じ不具合を探します。
 
 | メンバー | 機能 |
 |---|---|
@@ -359,7 +359,7 @@ macOS では更新 1 回につき `ioreg` を 1 回だけ呼び、負荷とメ�
 | [`tmux-network-revamped`](https://github.com/tmux-revamped/tmux-network-revamped) | ネットワークのスループットをステータスバーに表示し、描画を止めません |
 | [`tmux-pain-control-revamped`](https://github.com/tmux-revamped/tmux-pain-control-revamped) | tmux のペインとウィンドウの操作キー。tmux のバージョンに対応し、vim と共存でき、どの prefix キーも無効にできます |
 | [`tmux-persist-revamped`](https://github.com/tmux-revamped/tmux-persist-revamped) | tmuxのすべてのセッション、ウィンドウ、ペインを保存し、タイマーで自動保存して、再起動後にすべて復元します |
-| [`tmux-plugin-template`](https://github.com/tmux-revamped/tmux-plugin-template) | tmux-revampedプラグインの出発点です。共有ライブラリ、batsハーネス、CI、ファミリーのツールを含みます |
+| [`tmux-plugin-template`](https://github.com/tmux-revamped/tmux-plugin-template) | tmux-revampedプラグインの出発点です。共有ライブラリ、batsハーネス、CIを含みます |
 | [`tmux-pomodoro-revamped`](https://github.com/tmux-revamped/tmux-pomodoro-revamped) | すべての状態をtmuxオプションに保持し、一時ファイルを使わない、tmuxステータスバーのポモドーロタイマーです |
 | [`tmux-ram-revamped`](https://github.com/tmux-revamped/tmux-ram-revamped) | RAM、スワップ、メモリプレッシャーをtmuxのステータスバーに表示します。計測はバックグラウンドで行うため描画を待たせません |
 | [`tmux-reorder-revamped`](https://github.com/tmux-revamped/tmux-reorder-revamped) | tmuxのステータスバー上でウィンドウのタブをマウスでドラッグして、そのウィンドウを移動します |
@@ -368,15 +368,5 @@ macOS では更新 1 回につき `ioreg` を 1 回だけ呼び、負荷とメ�
 | [`tmux-tiling-revamped`](https://github.com/tmux-revamped/tmux-tiling-revamped) | tmuxのタイル型ウィンドウ管理です。BSPのdwindleとspiralを含む8つのレイアウトと、レイアウトの取り消しがあります |
 | [`tmux-time-revamped`](https://github.com/tmux-revamped/tmux-time-revamped) | ステータスバーにローカル時計と世界時計を時間帯ごとの色で表示し、カウントダウンと夏時間の警告も出します |
 | [`tmux-weather-revamped`](https://github.com/tmux-revamped/tmux-weather-revamped) | wttr.inの天気をバックグラウンドで取得し、ステータスバーを待たせずに表示します |
-
-### インストールの確認
-
-全メンバーがディスク上にあれば、1 つのコマンドでメンバー間の衝突を報告できます。
-
-```sh
-family/bin/doctor --live
-```
-
-各メンバーと実行中の tmux サーバーを読み取り、重複したキー、重複したステータスのプレースホルダー、命名規則に合わないオプション、規約のバージョンが古いメンバーを報告します。
 
 <!-- family:end -->
