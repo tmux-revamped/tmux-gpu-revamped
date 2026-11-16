@@ -43,7 +43,7 @@ Guidance for anyone, human or agent, changing tmux-gpu-revamped. What it is and 
 
 ## Gaps against FAMILY.md
 
-As of 2026-11-15:
+As of 2026-11-16:
 
 - Every script is bash, under `#!/usr/bin/env bash`, not POSIX `sh`, so it is untested under `dash`, `zsh` and BusyBox `sh`.
 - The code lives in [`src/`](src) and [`src/lib/`](src/lib); there is no `bin/gpu-revamped`, `lib/state.sh` or `lib/core.sh`.
@@ -60,3 +60,4 @@ As of 2026-11-15:
 - Power, power percent, encoder, decoder, throttle, P-state, top process and fan work on Linux only.
 - The macOS clock is a nominal value from a table keyed on the chip, not a live reading.
 - No `@gpu_revamped_notify` for a temperature over its high tier yet.
+- No test presses its keys through a real client attached from a second tmux.
