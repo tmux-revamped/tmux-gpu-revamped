@@ -60,3 +60,4 @@ As of 2026-11-17:
 - Power, power percent, encoder, decoder, throttle, P-state, top process and fan work on Linux only.
 - The macOS clock is a nominal value from a table keyed on the chip, not a live reading.
 - No `@gpu_revamped_notify` for a temperature over its high tier yet.
+- `get_tmux_option` keeps a tmux option set to nothing as an empty value, where FAMILY.md has it mean the default; the ticker's own reader already takes the default.
