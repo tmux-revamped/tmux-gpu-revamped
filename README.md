@@ -327,6 +327,8 @@ On macOS one `ioreg` call per refresh serves both load and memory. Number format
 | `make lint` | shellcheck at warning severity on every shell file |
 | `make coverage` | kcov line coverage on Linux, failing below 95% |
 
+On macOS, `brew bundle` installs every tool these targets call, from the [`Brewfile`](Brewfile).
+
 The parsers in [`src/lib/gpu/gpu.sh`](src/lib/gpu/gpu.sh) take tool output as an argument and return a number, and every tool call sits in a small `_read_*` wrapper, so the tests feed recorded output without a GPU.
 
 ## License

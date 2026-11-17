@@ -327,6 +327,8 @@ macOS では更新 1 回につき `ioreg` を 1 回だけ呼び、負荷とメ�
 | `make lint` | すべてのシェルファイルに対する warning 重大度の shellcheck |
 | `make coverage` | Linux での kcov による行カバレッジ。95% 未満で失敗します |
 
+macOS では、`brew bundle` を実行すると、これらのターゲットが使うツールがすべて [`Brewfile`](Brewfile) からインストールされます。
+
 [`src/lib/gpu/gpu.sh`](src/lib/gpu/gpu.sh) のパーサーはツールの出力を引数で受け取って数値を返し、ツールの呼び出しはすべて小さな `_read_*` ラッパーに収まっています。そのため、テストは GPU なしで記録済みの出力を渡せます。
 
 ## ライセンス

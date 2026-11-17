@@ -327,6 +327,8 @@ graph LR
 | `make lint` | 對所有 shell 檔案執行 warning 級別的 shellcheck |
 | `make coverage` | 在 Linux 上以 kcov 統計行覆蓋率，低於 95% 時失敗 |
 
+在 macOS 上，執行 `brew bundle` 會根據 [`Brewfile`](Brewfile) 安裝這些目標用到的所有工具。
+
 [`src/lib/gpu/gpu.sh`](src/lib/gpu/gpu.sh) 中的解析函數以參數接收工具輸出並傳回數字，每次工具呼叫都放在一個小型 `_read_*` 包裝函數中，因此測試無需 GPU 即可傳入預先錄製的輸出。
 
 ## 授權
