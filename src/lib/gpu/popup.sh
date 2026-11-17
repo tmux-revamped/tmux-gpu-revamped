@@ -42,8 +42,14 @@ gpu_popup_command() {
 }
 
 gpu_popup() {
-  local cmd width height
+  local cmd width height program shown
   cmd=$(gpu_popup_command)
+  program="${cmd%% *}"
+  if ! has_command "${program}"; then
+    shown=$(printf '%s\n' "${program}" | sed 's/#/##/g')
+    _tmux display-message "gpu-revamped: ${shown} is not installed"
+    return 0
+  fi
   width=$(get_tmux_option "@gpu_revamped_popup_width" "80%")
   height=$(get_tmux_option "@gpu_revamped_popup_height" "80%")
   _tmux display-popup -w "${width}" -h "${height}" -E "${cmd}"

@@ -59,13 +59,31 @@ teardown() {
 }
 
 @test "popup.sh - gpu_popup honors custom popup size" {
-  has_command() { return 1; }
+  # Arrange
+  has_command() { [[ "$1" == "top" ]]; }
   set_tmux_option "@gpu_revamped_popup_width" "60%"
   set_tmux_option "@gpu_revamped_popup_height" "50%"
   _tmux() { echo "TMUX $*"; }
+
+  # Act
   run gpu_popup
+
+  # Assert
   [[ "${output}" == *"-w 60%"* ]]
   [[ "${output}" == *"-h 50%"* ]]
+}
+
+@test "popup.sh - gpu_popup names a command that is not installed instead of opening a popup that closes at once" {
+  # Arrange
+  has_command() { return 1; }
+  set_tmux_option "@gpu_revamped_popup_command" "radeontop#1 -c"
+  _tmux() { echo "TMUX $*"; }
+
+  # Act
+  run gpu_popup
+
+  # Assert
+  [[ "${output}" == "TMUX display-message gpu-revamped: radeontop##1 is not installed" ]]
 }
 
 @test "popup.sh - _tmux seam forwards to tmux" {

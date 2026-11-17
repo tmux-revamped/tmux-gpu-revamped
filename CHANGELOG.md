@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed
+
+- A `@gpu_revamped_popup_command` whose program is not installed opened a popup
+  that closed at once. `prefix + M-g` now names the missing command in a
+  message.
+
 ## [2.0.0] - 2026-10-17
 
 ### Added
