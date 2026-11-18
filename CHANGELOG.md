@@ -1,18 +1,5 @@
 # Changelog
 
-All notable changes to this project are documented in this file.
-
-The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
-and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
-
-## [Unreleased]
-
-### Fixed
-
-- A `@gpu_revamped_popup_command` whose program is not installed opened a popup
-  that closed at once. `prefix + M-g` now names the missing command in a
-  message.
-
 ## [2.0.0] - 2026-10-17
 
 ### Added
