@@ -1,5 +1,33 @@
 # Changelog
 
+# [3.0.0](https://github.com/tmux-revamped/tmux-gpu-revamped/compare/v2.0.0...v3.0.0) (2026-11-18)
+
+
+### Bug Fixes
+
+* **family:** fail when git cannot read a mode ([1f046df](https://github.com/tmux-revamped/tmux-gpu-revamped/commit/1f046dffdc1003a753fe070b2392b85617a5a45d))
+* **family:** honor only active exceptions ([0a8e179](https://github.com/tmux-revamped/tmux-gpu-revamped/commit/0a8e179523e376c95a47b88370b904a44fb3a932))
+* **family:** reject unquoted replacements ([b027165](https://github.com/tmux-revamped/tmux-gpu-revamped/commit/b027165fa9cbb36b6b4bf779d0eca0dbe737ccb2))
+* **family:** require executable entry points ([81b6eba](https://github.com/tmux-revamped/tmux-gpu-revamped/commit/81b6ebad133113e38af025819163326f3c1975e2))
+* name a popup command that is missing ([5a24f43](https://github.com/tmux-revamped/tmux-gpu-revamped/commit/5a24f438f6228a953ace111b086b12b5757476fb))
+
+
+### Documentation
+
+* add the settings and value rules ([9061a7c](https://github.com/tmux-revamped/tmux-gpu-revamped/commit/9061a7cc634a27ea4eab4fe02f0186bcf38a88a0))
+
+
+### Features
+
+* add a shared desktop notifier ([5a92360](https://github.com/tmux-revamped/tmux-gpu-revamped/commit/5a92360fdec4a61f6563cc4fcb3a4714f1173cbc))
+* **family:** accept bot updates in the audit ([fe93ec6](https://github.com/tmux-revamped/tmux-gpu-revamped/commit/fe93ec69965867706bc95769ce0106b1781b4ed8))
+
+
+### BREAKING CHANGES
+
+* decided on its own, apart from the alias rule, which
+is about names.
+
 ## [2.0.0] - 2026-10-17
 
 ### Added
